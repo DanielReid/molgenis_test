@@ -1,0 +1,50 @@
+Meeting Mummi, Rob F, Rob H
+
+Objective: submission pipeline HGVBaseG2P
+- ISA-Tab base submission, Philippe, Sansone, validation API
+- Import and validation pipeline [link into 
+- Data curation using MOLGENIS + import API
+- synchronize with a ISA archive
+- + marker database, study database, HGVBaseG2P
+
+Questions:
+- what format of the data import??
+
+
+
+
+Feature requests:
+FIXED? lowercase/uppercase issue in extractmodel
+WONTFIX? difrentiate reserved words per database
+document view mechanism
+hide lists per forms??? and per view???
+ontology aware fields -> ontology plugin
+collapse in record view
+collapse in record view
+goto experiment link
+biomart -> rob -> biomart config export
+versioned???
+look into tools to synchronize databases...
+plugin of other languages??? embedded or system call
+use schema conversion tools instead of new generator for create tables
+static function on e.g. User to fetch Roles for a list of Users
+FIXED? many to many relationships to specify mref_table, from, to
+
+jquery for ajax
+export as das and put on gbrowse, feature database
+use biojava to connect to it => Machiel?
+
+opensearch xml format?
+
+joint EU funding on small projects?
+- show impact like gbrowse, biomart, 
+- 
+
+
+
+config file
+- fuge classes, helsinki, inheritance
+
+summer of code and other grant opportunities.
+
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<molgenis name="molgenis_test" label="My First MOLGENIS">
+    <!-- prototyping of security -->
+	<!-- prototyping of security -->
+	<entity name="MolgenisUserGroup" system="true">
+		<description>MolgenisUserGroup is the local administration of MOLGENIS user groups; group have the permissions to edit/view certain elements</description>
+		<field name="id" type="autoid" />
+		<field name="name" unique="true" />
+		<field name="superuser" type="bool" default="false"/>
+		<field name="members" type="mref" xref_field="MolgenisUser.id" xref_label="name"/>
+	</entity>
+	<entity name="MolgenisUser" system="true">
+	<description>Users known within this MOLGENIS. May be derived from another authentication source at first login like LDAP.</description>
+		<field name="id" type="autoid" />
+		<field name="name" unique="true" />
+		<field name="password" type="string" description="big fixme: password type"/>
+		<field name="emailaddress" type="string" unique="true"/>
+		<field name="activationCode" type="string" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
+		<field name="active" type="bool" default="false" description="Boolean to indicate if this account can be used to login" />
+		<!-- todo: profile: picture, first, last name, institute, field, address, zip, city, country , timezone, flag to set public email, website, other details-->
+	</entity>
+	<entity name="MolgenisPermission" system="true">
+		<field name="id" type="autoid"/>
+		<field name="userGroup" type="xref" xref_field="MolgenisUserGroup.id" xref_label="name"/>
+		<field name="molgenisEntity" type="string"/>
+		<field name="canRead" type="bool"/>
+		<field name="canEdit" type="bool"/>
+	</entity>
+</molgenis>

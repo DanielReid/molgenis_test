@@ -1,0 +1,4 @@
+name	normalmref	normalmref_normalvarchar
+aap	1|2|3	schaap|jet|piet
+noot	4	henk
+mies	

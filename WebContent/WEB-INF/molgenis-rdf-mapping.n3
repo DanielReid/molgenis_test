@@ -1,0 +1,1233 @@
+@prefix map: <file:///stdout#> .
+@prefix db: <> .
+@prefix vocab: <http://localhost:8080/molgenis_distro/vocab/resource/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix d2rq: <http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#> .
+@prefix jdbc: <http://d2rq.org/terms/jdbc/> .
+@prefix d2r: <http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#> .
+
+<> a d2r:Server;
+    rdfs:label "D2R Server";
+    d2r:baseURI <http://localhost:8080/molgenis_distro/>;
+    d2r:port 8080;
+    d2r:documentMetadata [
+        rdfs:comment "This comment is custom document metadata.";
+    ];
+	d2r:vocabularyIncludeInstances true;    
+    .
+
+# Should be jndi loaded!
+map:database a d2rq:Database;
+	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
+	d2rq:jdbcDSN "jdbc:mysql://localhost/test_molgenis_test";
+	d2rq:username "molgenis";
+	d2rq:password "molgenis";
+	jdbc:autoReconnect "true";
+	jdbc:zeroDateTimeBehavior "convertToNull";
+	.
+# Entity VarcharEntity
+map:VarcharEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "VarcharEntity/@@VarcharEntity.id@@";
+	d2rq:class vocab:VarcharEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for VarcharEntity using primary key
+map:VarcharEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:VarcharEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "VarcharEntity #@@VarcharEntity.id@@";
+	.
+map:VarcharEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:VarcharEntity;
+	d2rq:property vocab:VarcharEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "VarcharEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:VarcharEntity_normalVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:VarcharEntity;
+	d2rq:property vocab:VarcharEntity_normalVarchar;
+	d2rq:propertyDefinitionLabel "Normal Varchar";
+	d2rq:propertyDefinitionComment "Normal Varchar";
+	d2rq:column "VarcharEntity.normalVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:VarcharEntity_readonlyVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:VarcharEntity;
+	d2rq:property vocab:VarcharEntity_readonlyVarchar;
+	d2rq:propertyDefinitionLabel "Readonly Varchar";
+	d2rq:propertyDefinitionComment "Readonly Varchar";
+	d2rq:column "VarcharEntity.readonlyVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:VarcharEntity_nillableVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:VarcharEntity;
+	d2rq:property vocab:VarcharEntity_nillableVarchar;
+	d2rq:propertyDefinitionLabel "Nillable Varchar";
+	d2rq:propertyDefinitionComment "Nillable Varchar";
+	d2rq:column "VarcharEntity.nillableVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:VarcharEntity_defaultVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:VarcharEntity;
+	d2rq:property vocab:VarcharEntity_defaultVarchar;
+	d2rq:propertyDefinitionLabel "Defaulted Varchar";
+	d2rq:propertyDefinitionComment "Defaulted Varchar";
+	d2rq:column "VarcharEntity.defaultVarchar";
+	d2rq:datatype xsd:string;
+	.
+# Entity XrefEntity
+map:XrefEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "XrefEntity/@@XrefEntity.id@@";
+	d2rq:class vocab:XrefEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for XrefEntity using primary key
+map:XrefEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "XrefEntity #@@XrefEntity.id@@";
+	.
+map:XrefEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefEntity;
+	d2rq:property vocab:XrefEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "XrefEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:XrefEntity_normalXref a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefEntity;
+	d2rq:property vocab:XrefEntity_normalXref;
+	d2rq:propertyDefinitionLabel "Normal Xref";
+	d2rq:propertyDefinitionComment "Normal Xref";
+	d2rq:refersToClassMap map:VarcharEntity;
+	d2rq:join "XrefEntity.normalXref => VarcharEntity.id";
+	.
+map:XrefEntity_readonlyXref a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefEntity;
+	d2rq:property vocab:XrefEntity_readonlyXref;
+	d2rq:propertyDefinitionLabel "Readonly Xref";
+	d2rq:propertyDefinitionComment "Readonly Xref";
+	d2rq:refersToClassMap map:VarcharEntity;
+	d2rq:join "XrefEntity.readonlyXref => VarcharEntity.id";
+	.
+map:XrefEntity_nillableXref a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefEntity;
+	d2rq:property vocab:XrefEntity_nillableXref;
+	d2rq:propertyDefinitionLabel "Nillable Xref";
+	d2rq:propertyDefinitionComment "Nillable Xref";
+	d2rq:refersToClassMap map:VarcharEntity;
+	d2rq:join "XrefEntity.nillableXref => VarcharEntity.id";
+	.
+# Entity TreeEntity
+map:TreeEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "TreeEntity/@@TreeEntity.id@@";
+	d2rq:class vocab:TreeEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for TreeEntity using primary key
+map:TreeEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TreeEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "TreeEntity #@@TreeEntity.id@@";
+	.
+map:TreeEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TreeEntity;
+	d2rq:property vocab:TreeEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "TreeEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:TreeEntity_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TreeEntity;
+	d2rq:property vocab:TreeEntity_name;
+	d2rq:propertyDefinitionLabel "name";
+	d2rq:propertyDefinitionComment "name";
+	d2rq:column "TreeEntity.name";
+	d2rq:datatype xsd:string;
+	.
+map:TreeEntity_parent a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TreeEntity;
+	d2rq:property vocab:TreeEntity_parent;
+	d2rq:propertyDefinitionLabel "parent";
+	d2rq:propertyDefinitionComment "parent";
+	d2rq:refersToClassMap map:TreeEntity;
+	d2rq:join "TreeEntity.parent => TreeEntity.id";
+	.
+# Entity DateEntity
+map:DateEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "DateEntity/@@DateEntity.id@@";
+	d2rq:class vocab:DateEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for DateEntity using primary key
+map:DateEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "DateEntity #@@DateEntity.id@@";
+	.
+map:DateEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property vocab:DateEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "DateEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:DateEntity_normalDate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property vocab:DateEntity_normalDate;
+	d2rq:propertyDefinitionLabel "Normal Date";
+	d2rq:propertyDefinitionComment "Normal Date";
+	d2rq:column "DateEntity.normalDate";
+	d2rq:datatype xsd:date;
+	.
+map:DateEntity_readonlyDate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property vocab:DateEntity_readonlyDate;
+	d2rq:propertyDefinitionLabel "Readonly Date";
+	d2rq:propertyDefinitionComment "Readonly Date";
+	d2rq:column "DateEntity.readonlyDate";
+	d2rq:datatype xsd:date;
+	.
+map:DateEntity_nillableDate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property vocab:DateEntity_nillableDate;
+	d2rq:propertyDefinitionLabel "Nillable Date";
+	d2rq:propertyDefinitionComment "Nillable Date";
+	d2rq:column "DateEntity.nillableDate";
+	d2rq:datatype xsd:date;
+	.
+map:DateEntity_autoDate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property vocab:DateEntity_autoDate;
+	d2rq:propertyDefinitionLabel "Auto Date";
+	d2rq:propertyDefinitionComment "Auto Date";
+	d2rq:column "DateEntity.autoDate";
+	d2rq:datatype xsd:date;
+	.
+map:DateEntity_defaultDate a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateEntity;
+	d2rq:property vocab:DateEntity_defaultDate;
+	d2rq:propertyDefinitionLabel "Default Date";
+	d2rq:propertyDefinitionComment "Default Date";
+	d2rq:column "DateEntity.defaultDate";
+	d2rq:datatype xsd:date;
+	.
+# Entity DateTimeEntity
+map:DateTimeEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "DateTimeEntity/@@DateTimeEntity.id@@";
+	d2rq:class vocab:DateTimeEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for DateTimeEntity using primary key
+map:DateTimeEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "DateTimeEntity #@@DateTimeEntity.id@@";
+	.
+map:DateTimeEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property vocab:DateTimeEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "DateTimeEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:DateTimeEntity_normalDateTime a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property vocab:DateTimeEntity_normalDateTime;
+	d2rq:propertyDefinitionLabel "Normal DateTime";
+	d2rq:propertyDefinitionComment "Normal DateTime";
+	d2rq:column "DateTimeEntity.normalDateTime";
+	d2rq:datatype xsd:dateTime;
+	.
+map:DateTimeEntity_readonlyDateTime a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property vocab:DateTimeEntity_readonlyDateTime;
+	d2rq:propertyDefinitionLabel "Readonly DateTime";
+	d2rq:propertyDefinitionComment "Readonly DateTime";
+	d2rq:column "DateTimeEntity.readonlyDateTime";
+	d2rq:datatype xsd:dateTime;
+	.
+map:DateTimeEntity_nillableDateTime a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property vocab:DateTimeEntity_nillableDateTime;
+	d2rq:propertyDefinitionLabel "Nillable DateTime";
+	d2rq:propertyDefinitionComment "Nillable DateTime";
+	d2rq:column "DateTimeEntity.nillableDateTime";
+	d2rq:datatype xsd:dateTime;
+	.
+map:DateTimeEntity_autoDateTime a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property vocab:DateTimeEntity_autoDateTime;
+	d2rq:propertyDefinitionLabel "Auto DateTime";
+	d2rq:propertyDefinitionComment "Auto DateTime";
+	d2rq:column "DateTimeEntity.autoDateTime";
+	d2rq:datatype xsd:dateTime;
+	.
+map:DateTimeEntity_defaultDateTime a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DateTimeEntity;
+	d2rq:property vocab:DateTimeEntity_defaultDateTime;
+	d2rq:propertyDefinitionLabel "Default DateTime";
+	d2rq:propertyDefinitionComment "Default DateTime";
+	d2rq:column "DateTimeEntity.defaultDateTime";
+	d2rq:datatype xsd:dateTime;
+	.
+# Entity MrefEntity
+map:MrefEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "MrefEntity/@@MrefEntity.id@@";
+	d2rq:class vocab:MrefEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for MrefEntity using primary key
+map:MrefEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:MrefEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "MrefEntity #@@MrefEntity.id@@";
+	.
+map:MrefEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:MrefEntity;
+	d2rq:property vocab:MrefEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "MrefEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:MrefEntity_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:MrefEntity;
+	d2rq:property vocab:MrefEntity_name;
+	d2rq:propertyDefinitionLabel "name";
+	d2rq:propertyDefinitionComment "At least one normal field is required...";
+	d2rq:column "MrefEntity.name";
+	d2rq:datatype xsd:string;
+	.
+map:MrefEntity_normalMref a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:MrefEntity;
+	d2rq:property vocab:MrefEntity_normalMref;
+	d2rq:propertyDefinitionLabel "Normal Mref";
+	d2rq:propertyDefinitionComment "Normal Mref";
+	d2rq:refersToClassMap map:VarcharEntity;
+	d2rq:join "MrefEntity.id <= MrefEntity_normalMref.MrefEntity";
+	d2rq:join "MrefEntity_normalMref.normalMref => VarcharEntity.id";
+	.
+map:MrefEntity_readonlyMref a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:MrefEntity;
+	d2rq:property vocab:MrefEntity_readonlyMref;
+	d2rq:propertyDefinitionLabel "Readonly Mref";
+	d2rq:propertyDefinitionComment "Readonly Mref";
+	d2rq:refersToClassMap map:VarcharEntity;
+	d2rq:join "MrefEntity.id <= MrefEntity_readonlyMref.MrefEntity";
+	d2rq:join "MrefEntity_readonlyMref.readonlyMref => VarcharEntity.id";
+	.
+map:MrefEntity_nillableMref a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:MrefEntity;
+	d2rq:property vocab:MrefEntity_nillableMref;
+	d2rq:propertyDefinitionLabel "Nillable Mref";
+	d2rq:propertyDefinitionComment "Nillable Mref";
+	d2rq:refersToClassMap map:VarcharEntity;
+	d2rq:join "MrefEntity.id <= MrefEntity_nillableMref.MrefEntity";
+	d2rq:join "MrefEntity_nillableMref.nillableMref => VarcharEntity.id";
+	.
+# Entity FileEntity
+map:FileEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "FileEntity/@@FileEntity.id@@";
+	d2rq:class vocab:FileEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for FileEntity using primary key
+map:FileEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FileEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "FileEntity #@@FileEntity.id@@";
+	.
+map:FileEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FileEntity;
+	d2rq:property vocab:FileEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "FileEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:FileEntity_normalFile a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FileEntity;
+	d2rq:property vocab:FileEntity_normalFile;
+	d2rq:propertyDefinitionLabel "Normal File";
+	d2rq:propertyDefinitionComment "Normal File";
+	d2rq:column "FileEntity.normalFile";
+	d2rq:datatype xsd:url;
+	.
+map:FileEntity_readonlyFile a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FileEntity;
+	d2rq:property vocab:FileEntity_readonlyFile;
+	d2rq:propertyDefinitionLabel "Readonly File";
+	d2rq:propertyDefinitionComment "Readonly File";
+	d2rq:column "FileEntity.readonlyFile";
+	d2rq:datatype xsd:url;
+	.
+map:FileEntity_nillableFile a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FileEntity;
+	d2rq:property vocab:FileEntity_nillableFile;
+	d2rq:propertyDefinitionLabel "Nillable File";
+	d2rq:propertyDefinitionComment "Nillable File";
+	d2rq:column "FileEntity.nillableFile";
+	d2rq:datatype xsd:url;
+	.
+# Entity EnumEntity
+map:EnumEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "EnumEntity/@@EnumEntity.id@@";
+	d2rq:class vocab:EnumEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for EnumEntity using primary key
+map:EnumEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:EnumEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "EnumEntity #@@EnumEntity.id@@";
+	.
+map:EnumEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:EnumEntity;
+	d2rq:property vocab:EnumEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "EnumEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:EnumEntity_normalEnum a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:EnumEntity;
+	d2rq:property vocab:EnumEntity_normalEnum;
+	d2rq:propertyDefinitionLabel "Normal Enum";
+	d2rq:propertyDefinitionComment "Normal Enum";
+	d2rq:column "EnumEntity.normalEnum";
+	d2rq:datatype xsd:string;
+	.
+map:EnumEntity_readonlyEnum a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:EnumEntity;
+	d2rq:property vocab:EnumEntity_readonlyEnum;
+	d2rq:propertyDefinitionLabel "Readonly Enum";
+	d2rq:propertyDefinitionComment "Readonly Enum";
+	d2rq:column "EnumEntity.readonlyEnum";
+	d2rq:datatype xsd:string;
+	.
+map:EnumEntity_nillableEnum a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:EnumEntity;
+	d2rq:property vocab:EnumEntity_nillableEnum;
+	d2rq:propertyDefinitionLabel "Nillable Enum";
+	d2rq:propertyDefinitionComment "Nillable Enum";
+	d2rq:column "EnumEntity.nillableEnum";
+	d2rq:datatype xsd:string;
+	.
+map:EnumEntity_defaultEnum a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:EnumEntity;
+	d2rq:property vocab:EnumEntity_defaultEnum;
+	d2rq:propertyDefinitionLabel "Defaulted Enum";
+	d2rq:propertyDefinitionComment "Defaulted Enum";
+	d2rq:column "EnumEntity.defaultEnum";
+	d2rq:datatype xsd:string;
+	.
+# Entity DecimalEntity
+map:DecimalEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "DecimalEntity/@@DecimalEntity.id@@";
+	d2rq:class vocab:DecimalEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for DecimalEntity using primary key
+map:DecimalEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DecimalEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "DecimalEntity #@@DecimalEntity.id@@";
+	.
+map:DecimalEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DecimalEntity;
+	d2rq:property vocab:DecimalEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "DecimalEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:DecimalEntity_normalDecimal a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DecimalEntity;
+	d2rq:property vocab:DecimalEntity_normalDecimal;
+	d2rq:propertyDefinitionLabel "Normal Decimal";
+	d2rq:propertyDefinitionComment "Normal Decimal";
+	d2rq:column "DecimalEntity.normalDecimal";
+	d2rq:datatype xsd:decimal;
+	.
+map:DecimalEntity_readonlyDecimal a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DecimalEntity;
+	d2rq:property vocab:DecimalEntity_readonlyDecimal;
+	d2rq:propertyDefinitionLabel "Readonly Decimal";
+	d2rq:propertyDefinitionComment "Readonly Decimal";
+	d2rq:column "DecimalEntity.readonlyDecimal";
+	d2rq:datatype xsd:decimal;
+	.
+map:DecimalEntity_nillableDecimal a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DecimalEntity;
+	d2rq:property vocab:DecimalEntity_nillableDecimal;
+	d2rq:propertyDefinitionLabel "Nillable Decimal";
+	d2rq:propertyDefinitionComment "Nillable Decimal";
+	d2rq:column "DecimalEntity.nillableDecimal";
+	d2rq:datatype xsd:decimal;
+	.
+map:DecimalEntity_defaultDecimal a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DecimalEntity;
+	d2rq:property vocab:DecimalEntity_defaultDecimal;
+	d2rq:propertyDefinitionLabel "Defaulted Decimal";
+	d2rq:propertyDefinitionComment "Defaulted Decimal";
+	d2rq:column "DecimalEntity.defaultDecimal";
+	d2rq:datatype xsd:decimal;
+	.
+# Entity BoolEntity
+map:BoolEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "BoolEntity/@@BoolEntity.id@@";
+	d2rq:class vocab:BoolEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for BoolEntity using primary key
+map:BoolEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BoolEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "BoolEntity #@@BoolEntity.id@@";
+	.
+map:BoolEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BoolEntity;
+	d2rq:property vocab:BoolEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "BoolEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:BoolEntity_normalBool a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BoolEntity;
+	d2rq:property vocab:BoolEntity_normalBool;
+	d2rq:propertyDefinitionLabel "Normal Bool";
+	d2rq:propertyDefinitionComment "Normal Bool";
+	d2rq:column "BoolEntity.normalBool";
+	d2rq:datatype xsd:boolean;
+	.
+map:BoolEntity_readonlyBool a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BoolEntity;
+	d2rq:property vocab:BoolEntity_readonlyBool;
+	d2rq:propertyDefinitionLabel "Readonly Bool";
+	d2rq:propertyDefinitionComment "Readonly Bool";
+	d2rq:column "BoolEntity.readonlyBool";
+	d2rq:datatype xsd:boolean;
+	.
+map:BoolEntity_nillableBool a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BoolEntity;
+	d2rq:property vocab:BoolEntity_nillableBool;
+	d2rq:propertyDefinitionLabel "Nillable Bool";
+	d2rq:propertyDefinitionComment "Nillable Bool";
+	d2rq:column "BoolEntity.nillableBool";
+	d2rq:datatype xsd:boolean;
+	.
+map:BoolEntity_defaultBool a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BoolEntity;
+	d2rq:property vocab:BoolEntity_defaultBool;
+	d2rq:propertyDefinitionLabel "Defaulted Bool";
+	d2rq:propertyDefinitionComment "Defaulted Bool";
+	d2rq:column "BoolEntity.defaultBool";
+	d2rq:datatype xsd:boolean;
+	.
+# Entity IntEntity
+map:IntEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "IntEntity/@@IntEntity.id@@";
+	d2rq:class vocab:IntEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for IntEntity using primary key
+map:IntEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:IntEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "IntEntity #@@IntEntity.id@@";
+	.
+map:IntEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:IntEntity;
+	d2rq:property vocab:IntEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "IntEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:IntEntity_normalInt a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:IntEntity;
+	d2rq:property vocab:IntEntity_normalInt;
+	d2rq:propertyDefinitionLabel "Normal Int";
+	d2rq:propertyDefinitionComment "Normal Int";
+	d2rq:column "IntEntity.normalInt";
+	d2rq:datatype xsd:int;
+	.
+map:IntEntity_readonlyInt a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:IntEntity;
+	d2rq:property vocab:IntEntity_readonlyInt;
+	d2rq:propertyDefinitionLabel "Readonly Int";
+	d2rq:propertyDefinitionComment "Readonly Int";
+	d2rq:column "IntEntity.readonlyInt";
+	d2rq:datatype xsd:int;
+	.
+map:IntEntity_nillableInt a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:IntEntity;
+	d2rq:property vocab:IntEntity_nillableInt;
+	d2rq:propertyDefinitionLabel "Nillable Int";
+	d2rq:propertyDefinitionComment "Nillable Int";
+	d2rq:column "IntEntity.nillableInt";
+	d2rq:datatype xsd:int;
+	.
+map:IntEntity_defaultInt a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:IntEntity;
+	d2rq:property vocab:IntEntity_defaultInt;
+	d2rq:propertyDefinitionLabel "Defaulted Bool";
+	d2rq:propertyDefinitionComment "Defaulted Bool";
+	d2rq:column "IntEntity.defaultInt";
+	d2rq:datatype xsd:int;
+	.
+# Entity HiddenId
+map:HiddenId a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "HiddenId/@@HiddenId.id@@";
+	d2rq:class vocab:HiddenId;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for HiddenId using primary key
+map:HiddenId__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:HiddenId;
+	d2rq:property rdfs:label;
+	d2rq:pattern "HiddenId #@@HiddenId.id@@";
+	.
+map:HiddenId_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:HiddenId;
+	d2rq:property vocab:HiddenId_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "HiddenId.id";
+	d2rq:datatype xsd:int;
+	.
+map:HiddenId_normalVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:HiddenId;
+	d2rq:property vocab:HiddenId_normalVarchar;
+	d2rq:propertyDefinitionLabel "Normal Varchar";
+	d2rq:propertyDefinitionComment "Normal Varchar";
+	d2rq:column "HiddenId.normalVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:HiddenId_readonlyVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:HiddenId;
+	d2rq:property vocab:HiddenId_readonlyVarchar;
+	d2rq:propertyDefinitionLabel "Readonly Varchar";
+	d2rq:propertyDefinitionComment "Readonly Varchar";
+	d2rq:column "HiddenId.readonlyVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:HiddenId_nillableVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:HiddenId;
+	d2rq:property vocab:HiddenId_nillableVarchar;
+	d2rq:propertyDefinitionLabel "Nillable Varchar";
+	d2rq:propertyDefinitionComment "Nillable Varchar";
+	d2rq:column "HiddenId.nillableVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:HiddenId_defaultVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:HiddenId;
+	d2rq:property vocab:HiddenId_defaultVarchar;
+	d2rq:propertyDefinitionLabel "Defaulted Varchar";
+	d2rq:propertyDefinitionComment "Defaulted Varchar";
+	d2rq:column "HiddenId.defaultVarchar";
+	d2rq:datatype xsd:string;
+	.
+# Entity TextEntity
+map:TextEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "TextEntity/@@TextEntity.id@@";
+	d2rq:class vocab:TextEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for TextEntity using primary key
+map:TextEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TextEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "TextEntity #@@TextEntity.id@@";
+	.
+map:TextEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TextEntity;
+	d2rq:property vocab:TextEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "TextEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:TextEntity_normalText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TextEntity;
+	d2rq:property vocab:TextEntity_normalText;
+	d2rq:propertyDefinitionLabel "Normal Text";
+	d2rq:propertyDefinitionComment "Normal Text";
+	d2rq:column "TextEntity.normalText";
+	d2rq:datatype xsd:text;
+	.
+map:TextEntity_readonlyText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TextEntity;
+	d2rq:property vocab:TextEntity_readonlyText;
+	d2rq:propertyDefinitionLabel "Readonly Text";
+	d2rq:propertyDefinitionComment "Readonly Text";
+	d2rq:column "TextEntity.readonlyText";
+	d2rq:datatype xsd:text;
+	.
+map:TextEntity_nillableText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TextEntity;
+	d2rq:property vocab:TextEntity_nillableText;
+	d2rq:propertyDefinitionLabel "Nillable Text";
+	d2rq:propertyDefinitionComment "Nillable Text";
+	d2rq:column "TextEntity.nillableText";
+	d2rq:datatype xsd:text;
+	.
+map:TextEntity_defaultText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:TextEntity;
+	d2rq:property vocab:TextEntity_defaultText;
+	d2rq:propertyDefinitionLabel "Defaulted Text";
+	d2rq:propertyDefinitionComment "Defaulted Text";
+	d2rq:column "TextEntity.defaultText";
+	d2rq:datatype xsd:text;
+	.
+# Entity ClassA
+map:ClassA a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "ClassA/@@ClassA.id@@";
+	d2rq:class vocab:ClassA;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for ClassA using primary key
+map:ClassA__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:ClassA;
+	d2rq:property rdfs:label;
+	d2rq:pattern "ClassA #@@ClassA.id@@";
+	.
+map:ClassA___Type a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:ClassA;
+	d2rq:property vocab:ClassA___Type;
+	d2rq:propertyDefinitionLabel "__Type";
+	d2rq:propertyDefinitionComment "Subtypes have to be set to allow searching";
+	d2rq:column "ClassA.__Type";
+	d2rq:datatype xsd:string;
+	.
+map:ClassA_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:ClassA;
+	d2rq:property vocab:ClassA_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "ClassA.id";
+	d2rq:datatype xsd:int;
+	.
+map:ClassA_fieldA a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:ClassA;
+	d2rq:property vocab:ClassA_fieldA;
+	d2rq:propertyDefinitionLabel "fieldA";
+	d2rq:propertyDefinitionComment "fieldA";
+	d2rq:column "ClassA.fieldA";
+	d2rq:datatype xsd:string;
+	.
+# Entity BextendsA
+map:BextendsA a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "BextendsA/@@BextendsA.id@@";
+	d2rq:class vocab:BextendsA;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for BextendsA using primary key
+map:BextendsA__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BextendsA;
+	d2rq:property rdfs:label;
+	d2rq:pattern "BextendsA #@@BextendsA.id@@";
+	.
+map:BextendsA_fieldB a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BextendsA;
+	d2rq:property vocab:BextendsA_fieldB;
+	d2rq:propertyDefinitionLabel "fieldB";
+	d2rq:propertyDefinitionComment "fieldB";
+	d2rq:column "BextendsA.fieldB";
+	d2rq:datatype xsd:string;
+	.
+map:BextendsA_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BextendsA;
+	d2rq:property vocab:BextendsA_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "BextendsA.id";
+	d2rq:datatype xsd:int;
+	.
+# Entity CextendsA
+map:CextendsA a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "CextendsA/@@CextendsA.id@@";
+	d2rq:class vocab:CextendsA;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for CextendsA using primary key
+map:CextendsA__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CextendsA;
+	d2rq:property rdfs:label;
+	d2rq:pattern "CextendsA #@@CextendsA.id@@";
+	.
+map:CextendsA_fieldC a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CextendsA;
+	d2rq:property vocab:CextendsA_fieldC;
+	d2rq:propertyDefinitionLabel "fieldC";
+	d2rq:propertyDefinitionComment "fieldC";
+	d2rq:column "CextendsA.fieldC";
+	d2rq:datatype xsd:string;
+	.
+map:CextendsA_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CextendsA;
+	d2rq:property vocab:CextendsA_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "CextendsA.id";
+	d2rq:datatype xsd:int;
+	.
+# Entity DextendsB
+map:DextendsB a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "DextendsB/@@DextendsB.id@@";
+	d2rq:class vocab:DextendsB;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for DextendsB using primary key
+map:DextendsB__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsB;
+	d2rq:property rdfs:label;
+	d2rq:pattern "DextendsB #@@DextendsB.id@@";
+	.
+map:DextendsB_fieldD a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsB;
+	d2rq:property vocab:DextendsB_fieldD;
+	d2rq:propertyDefinitionLabel "fieldD";
+	d2rq:propertyDefinitionComment "fieldD";
+	d2rq:column "DextendsB.fieldD";
+	d2rq:datatype xsd:string;
+	.
+map:DextendsB_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsB;
+	d2rq:property vocab:DextendsB_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "DextendsB.id";
+	d2rq:datatype xsd:int;
+	.
+# Entity BimplementsA
+map:BimplementsA a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "BimplementsA/@@BimplementsA.id@@";
+	d2rq:class vocab:BimplementsA;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for BimplementsA using primary key
+map:BimplementsA__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BimplementsA;
+	d2rq:property rdfs:label;
+	d2rq:pattern "BimplementsA #@@BimplementsA.id@@";
+	.
+map:BimplementsA___Type a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BimplementsA;
+	d2rq:property vocab:BimplementsA___Type;
+	d2rq:propertyDefinitionLabel "__Type";
+	d2rq:propertyDefinitionComment "Subtypes have to be set to allow searching";
+	d2rq:column "BimplementsA.__Type";
+	d2rq:datatype xsd:string;
+	.
+map:BimplementsA_fieldB a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BimplementsA;
+	d2rq:property vocab:BimplementsA_fieldB;
+	d2rq:propertyDefinitionLabel "fieldB";
+	d2rq:propertyDefinitionComment "fieldB";
+	d2rq:column "BimplementsA.fieldB";
+	d2rq:datatype xsd:string;
+	.
+map:BimplementsA_issueType a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BimplementsA;
+	d2rq:property vocab:BimplementsA_IssueType;
+	d2rq:propertyDefinitionLabel "IssueType";
+	d2rq:propertyDefinitionComment "Issue";
+	d2rq:column "BimplementsA.IssueType";
+	d2rq:datatype xsd:string;
+	.
+map:BimplementsA_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BimplementsA;
+	d2rq:property vocab:BimplementsA_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "BimplementsA.id";
+	d2rq:datatype xsd:int;
+	.
+# Entity CimplementsA
+map:CimplementsA a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "CimplementsA/@@CimplementsA.id@@";
+	d2rq:class vocab:CimplementsA;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for CimplementsA using primary key
+map:CimplementsA__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CimplementsA;
+	d2rq:property rdfs:label;
+	d2rq:pattern "CimplementsA #@@CimplementsA.id@@";
+	.
+map:CimplementsA_fieldC a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CimplementsA;
+	d2rq:property vocab:CimplementsA_fieldC;
+	d2rq:propertyDefinitionLabel "fieldC";
+	d2rq:propertyDefinitionComment "fieldC";
+	d2rq:column "CimplementsA.fieldC";
+	d2rq:datatype xsd:string;
+	.
+map:CimplementsA_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CimplementsA;
+	d2rq:property vocab:CimplementsA_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "CimplementsA.id";
+	d2rq:datatype xsd:int;
+	.
+# Entity DextendsBimplementsA
+map:DextendsBimplementsA a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "DextendsBimplementsA/@@DextendsBimplementsA.id@@";
+	d2rq:class vocab:DextendsBimplementsA;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for DextendsBimplementsA using primary key
+map:DextendsBimplementsA__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsBimplementsA;
+	d2rq:property rdfs:label;
+	d2rq:pattern "DextendsBimplementsA #@@DextendsBimplementsA.id@@";
+	.
+map:DextendsBimplementsA_fieldD a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsBimplementsA;
+	d2rq:property vocab:DextendsBimplementsA_fieldD;
+	d2rq:propertyDefinitionLabel "fieldD";
+	d2rq:propertyDefinitionComment "fieldD";
+	d2rq:column "DextendsBimplementsA.fieldD";
+	d2rq:datatype xsd:string;
+	.
+map:DextendsBimplementsA_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsBimplementsA;
+	d2rq:property vocab:DextendsBimplementsA_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "DextendsBimplementsA.id";
+	d2rq:datatype xsd:int;
+	.
+map:DextendsBimplementsA___Type a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:DextendsBimplementsA;
+	d2rq:property vocab:DextendsBimplementsA___Type;
+	d2rq:propertyDefinitionLabel "__Type";
+	d2rq:propertyDefinitionComment "Subtypes have to be set to allow searching";
+	d2rq:column "DextendsBimplementsA.__Type";
+	d2rq:datatype xsd:string;
+	.
+# Entity guessMe
+map:guessMe a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "guessMe/@@guessMe.guessMeId@@";
+	d2rq:class vocab:guessMe;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for guessMe using primary key
+map:guessMe__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:guessMe;
+	d2rq:property rdfs:label;
+	d2rq:pattern "guessMe #@@guessMe.guessMeId@@";
+	.
+map:guessMe_thename a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:guessMe;
+	d2rq:property vocab:guessMe_thename;
+	d2rq:propertyDefinitionLabel "thename";
+	d2rq:propertyDefinitionComment "thename";
+	d2rq:column "guessMe.thename";
+	d2rq:datatype xsd:string;
+	.
+map:guessMe_guessMeId a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:guessMe;
+	d2rq:property vocab:guessMe_guessMeId;
+	d2rq:propertyDefinitionLabel "guessMeId";
+	d2rq:propertyDefinitionComment "guessMeId";
+	d2rq:column "guessMe.guessMeId";
+	d2rq:datatype xsd:int;
+	.
+# Entity GuessMeXref
+map:GuessMeXref a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "GuessMeXref/@@GuessMeXref.guessMeXrefId@@";
+	d2rq:class vocab:GuessMeXref;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for GuessMeXref using primary key
+map:GuessMeXref__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:GuessMeXref;
+	d2rq:property rdfs:label;
+	d2rq:pattern "GuessMeXref #@@GuessMeXref.guessMeXrefId@@";
+	.
+map:GuessMeXref_guessMeXrefId a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:GuessMeXref;
+	d2rq:property vocab:GuessMeXref_guessMeXrefId;
+	d2rq:propertyDefinitionLabel "guessMeXrefId";
+	d2rq:propertyDefinitionComment "guessMeXrefId";
+	d2rq:column "GuessMeXref.guessMeXrefId";
+	d2rq:datatype xsd:int;
+	.
+map:GuessMeXref_guessMeId a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:GuessMeXref;
+	d2rq:property vocab:GuessMeXref_guessMeId;
+	d2rq:propertyDefinitionLabel "guessMeId";
+	d2rq:propertyDefinitionComment "guessMeId";
+	d2rq:column "GuessMeXref.guessMeId";
+	d2rq:datatype xsd:int;
+	.
+# Entity Investigation
+map:Investigation a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "Investigation/@@Investigation.id@@";
+	d2rq:class vocab:Investigation;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for Investigation using primary key
+map:Investigation__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Investigation;
+	d2rq:property rdfs:label;
+	d2rq:pattern "Investigation #@@Investigation.id@@";
+	.
+map:Investigation_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Investigation;
+	d2rq:property vocab:Investigation_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "Investigation.id";
+	d2rq:datatype xsd:int;
+	.
+map:Investigation_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:Investigation;
+	d2rq:property vocab:Investigation_name;
+	d2rq:propertyDefinitionLabel "name";
+	d2rq:propertyDefinitionComment "name";
+	d2rq:column "Investigation.name";
+	d2rq:datatype xsd:string;
+	.
+# Entity SimpleCompositKey
+map:SimpleCompositKey a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "SimpleCompositKey/@@SimpleCompositKey.id@@";
+	d2rq:class vocab:SimpleCompositKey;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "Test reference for composit keys without them being xrefs
+				themselfs
+";
+	.	
+# todo: use the xref labels if they are complete
+# label for SimpleCompositKey using primary key
+map:SimpleCompositKey__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleCompositKey;
+	d2rq:property rdfs:label;
+	d2rq:pattern "SimpleCompositKey #@@SimpleCompositKey.id@@";
+	.
+map:SimpleCompositKey_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleCompositKey;
+	d2rq:property vocab:SimpleCompositKey_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "SimpleCompositKey.id";
+	d2rq:datatype xsd:int;
+	.
+map:SimpleCompositKey_key1 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleCompositKey;
+	d2rq:property vocab:SimpleCompositKey_key1;
+	d2rq:propertyDefinitionLabel "key1";
+	d2rq:propertyDefinitionComment "key1";
+	d2rq:column "SimpleCompositKey.key1";
+	d2rq:datatype xsd:string;
+	.
+map:SimpleCompositKey_key2 a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleCompositKey;
+	d2rq:property vocab:SimpleCompositKey_key2;
+	d2rq:propertyDefinitionLabel "key2";
+	d2rq:propertyDefinitionComment "key2";
+	d2rq:column "SimpleCompositKey.key2";
+	d2rq:datatype xsd:string;
+	.
+# Entity XrefCompositKey
+map:XrefCompositKey a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "XrefCompositKey/@@XrefCompositKey.id@@";
+	d2rq:class vocab:XrefCompositKey;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "Test reference for composit keys with one of them being xref
+				themselfs
+";
+	.	
+# todo: use the xref labels if they are complete
+# label for XrefCompositKey using primary key
+map:XrefCompositKey__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefCompositKey;
+	d2rq:property rdfs:label;
+	d2rq:pattern "XrefCompositKey #@@XrefCompositKey.id@@";
+	.
+map:XrefCompositKey_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefCompositKey;
+	d2rq:property vocab:XrefCompositKey_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "XrefCompositKey.id";
+	d2rq:datatype xsd:int;
+	.
+map:XrefCompositKey_investigation a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefCompositKey;
+	d2rq:property vocab:XrefCompositKey_investigation;
+	d2rq:propertyDefinitionLabel "investigation";
+	d2rq:propertyDefinitionComment "investigation";
+	d2rq:refersToClassMap map:Investigation;
+	d2rq:join "XrefCompositKey.investigation => Investigation.id";
+	.
+map:XrefCompositKey_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefCompositKey;
+	d2rq:property vocab:XrefCompositKey_name;
+	d2rq:propertyDefinitionLabel "name";
+	d2rq:propertyDefinitionComment "name";
+	d2rq:column "XrefCompositKey.name";
+	d2rq:datatype xsd:string;
+	.
+# Entity SimpleMulticolXref
+map:SimpleMulticolXref a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "SimpleMulticolXref/@@SimpleMulticolXref.id@@";
+	d2rq:class vocab:SimpleMulticolXref;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for SimpleMulticolXref using primary key
+map:SimpleMulticolXref__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleMulticolXref;
+	d2rq:property rdfs:label;
+	d2rq:pattern "SimpleMulticolXref #@@SimpleMulticolXref.id@@";
+	.
+map:SimpleMulticolXref_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleMulticolXref;
+	d2rq:property vocab:SimpleMulticolXref_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "SimpleMulticolXref.id";
+	d2rq:datatype xsd:int;
+	.
+map:SimpleMulticolXref_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleMulticolXref;
+	d2rq:property vocab:SimpleMulticolXref_name;
+	d2rq:propertyDefinitionLabel "name";
+	d2rq:propertyDefinitionComment "name";
+	d2rq:column "SimpleMulticolXref.name";
+	d2rq:datatype xsd:string;
+	.
+map:SimpleMulticolXref_multicol a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:SimpleMulticolXref;
+	d2rq:property vocab:SimpleMulticolXref_multicol;
+	d2rq:propertyDefinitionLabel "multicol";
+	d2rq:propertyDefinitionComment "multicol";
+	d2rq:refersToClassMap map:SimpleCompositKey;
+	d2rq:join "SimpleMulticolXref.multicol => SimpleCompositKey.id";
+	.
+# Entity XrefMulticolXref
+map:XrefMulticolXref a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "XrefMulticolXref/@@XrefMulticolXref.id@@";
+	d2rq:class vocab:XrefMulticolXref;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for XrefMulticolXref using primary key
+map:XrefMulticolXref__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefMulticolXref;
+	d2rq:property rdfs:label;
+	d2rq:pattern "XrefMulticolXref #@@XrefMulticolXref.id@@";
+	.
+map:XrefMulticolXref_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefMulticolXref;
+	d2rq:property vocab:XrefMulticolXref_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "XrefMulticolXref.id";
+	d2rq:datatype xsd:int;
+	.
+map:XrefMulticolXref_name a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefMulticolXref;
+	d2rq:property vocab:XrefMulticolXref_name;
+	d2rq:propertyDefinitionLabel "name";
+	d2rq:propertyDefinitionComment "name";
+	d2rq:column "XrefMulticolXref.name";
+	d2rq:datatype xsd:string;
+	.
+map:XrefMulticolXref_multicol a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:XrefMulticolXref;
+	d2rq:property vocab:XrefMulticolXref_multicol;
+	d2rq:propertyDefinitionLabel "multicol";
+	d2rq:propertyDefinitionComment "multicol";
+	d2rq:refersToClassMap map:XrefCompositKey;
+	d2rq:join "XrefMulticolXref.multicol => XrefCompositKey.id";
+	.

@@ -1,0 +1,5 @@
+normalVarchar	readonlyVarchar
+schaap	aap
+jet	noot
+piet	mies
+henk	hek
