@@ -16,7 +16,7 @@ import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.security.Login;
 import org.molgenis.util.Entity;
 
-public class DatabaseLogin implements Login
+public class DatabaseLogin<E extends Entity> implements Login<E>
 {
 	enum Permission
 	{
@@ -39,7 +39,7 @@ public class DatabaseLogin implements Login
 	}
 
 	@Override
-	public QueryRule getRowlevelSecurityFilters(Entity entity)
+	public QueryRule getRowlevelSecurityFilters(Class<E> klazz)
 	{
 		return null;
 	}
@@ -61,7 +61,7 @@ public class DatabaseLogin implements Login
 	}
 
 	@Override
-	public <E extends Entity> boolean canWrite(Class<E> entityClass)
+	public boolean canWrite(Class<E> entityClass)
 	{
 		// logger.debug("Checking edit permission for entity " +
 		// entityClass.getName());
@@ -77,7 +77,7 @@ public class DatabaseLogin implements Login
 	}
 
 	@Override
-	public <E extends Entity> boolean canRead(Class<E> entityClass)
+	public boolean canRead(Class<E> entityClass)
 	{
 		logger.debug("Checking read permission for entity " + entityClass.getName());
 		if (this.superuser)
@@ -192,7 +192,7 @@ public class DatabaseLogin implements Login
 	}
 
 	@Override
-	public <E extends Entity> boolean canWrite(E entity) throws DatabaseException
+	public boolean canWrite(E entity) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return true;
@@ -204,7 +204,7 @@ public class DatabaseLogin implements Login
 	}
 
 	@Override
-	public <E extends Entity> boolean canRead(Entity entity) throws DatabaseException
+	public boolean canRead(Entity entity) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;

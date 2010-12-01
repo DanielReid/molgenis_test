@@ -10,7 +10,7 @@
 
 <> a d2r:Server;
     rdfs:label "D2R Server";
-    d2r:baseURI <http://localhost:8080/molgenis_distro/>;
+    d2r:baseURI <http://localhost:8080/pheno/>;
     d2r:port 8080;
     d2r:documentMetadata [
         rdfs:comment "This comment is custom document metadata.";
@@ -1077,9 +1077,7 @@ map:SimpleCompositKey a d2rq:ClassMap;
 	d2rq:uriPattern "SimpleCompositKey/@@SimpleCompositKey.id@@";
 	d2rq:class vocab:SimpleCompositKey;
 	d2rq:classDefinitionLabel "";
-	d2rq:classDefinitionComment "Test reference for composit keys without them being xrefs
-				themselfs
-";
+	d2rq:classDefinitionComment "Test reference for composit keys without them being xrefs themselfs ";
 	.	
 # todo: use the xref labels if they are complete
 # label for SimpleCompositKey using primary key
@@ -1118,9 +1116,7 @@ map:XrefCompositKey a d2rq:ClassMap;
 	d2rq:uriPattern "XrefCompositKey/@@XrefCompositKey.id@@";
 	d2rq:class vocab:XrefCompositKey;
 	d2rq:classDefinitionLabel "";
-	d2rq:classDefinitionComment "Test reference for composit keys with one of them being xref
-				themselfs
-";
+	d2rq:classDefinitionComment "Test reference for composit keys with one of them being xref themselfs ";
 	.	
 # todo: use the xref labels if they are complete
 # label for XrefCompositKey using primary key

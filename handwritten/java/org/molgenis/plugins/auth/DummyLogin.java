@@ -9,16 +9,9 @@ import org.molgenis.framework.security.Login;
 import org.molgenis.util.Entity;
 
 
-public class DummyLogin implements Login
+public class DummyLogin<E extends Entity> implements Login<E>
 {
 	String name = null;
-	
-	@Override
-	public QueryRule getRowlevelSecurityFilters(Entity entity)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public Integer getUserId()
@@ -68,14 +61,14 @@ public class DummyLogin implements Login
 	}
 
 	@Override
-	public <E extends Entity> boolean canRead(Class<E> entityClass) throws DatabaseException
+	public boolean canRead(Class<E> entityClass) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public <E extends Entity> boolean canWrite(Class<E> entityClass) throws DatabaseException
+	public boolean canWrite(Class<E> entityClass) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -93,6 +86,13 @@ public class DummyLogin implements Login
 	{
 		//nothing to do
 		
+	}
+
+	@Override
+	public QueryRule getRowlevelSecurityFilters(Class klazz)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
