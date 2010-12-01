@@ -9,7 +9,7 @@ import org.molgenis.framework.security.Login;
 import org.molgenis.util.Entity;
 
 
-public class DummyLogin<E extends Entity> implements Login<E>
+public class DummyLogin implements Login
 {
 	String name = null;
 
@@ -61,14 +61,14 @@ public class DummyLogin<E extends Entity> implements Login<E>
 	}
 
 	@Override
-	public boolean canRead(Class<E> entityClass) throws DatabaseException
+	public boolean canRead(Class<? extends Entity> entityClass) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean canWrite(Class<E> entityClass) throws DatabaseException
+	public boolean canWrite(Class<? extends Entity> entityClass) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;
