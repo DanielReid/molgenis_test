@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="org/molgenis/plugins/download/|org/molgenis/plugins/examples/file/|org/molgenis/plugins/DatabaseLogin.java|org/molgenis/plugins/LoginScreen.java|molgenis/test/mref/|org/molgenis/plugins/examples/" kind="src" path="handwritten/java"/>
+	<classpathentry excluding="org/molgenis/plugins/examples/file/|molgenis/test/mref/|org/molgenis/plugins/DatabaseLogin.java" kind="src" path="handwritten/java"/>
 	<classpathentry kind="src" path="generated/sql"/>
 	<classpathentry kind="src" path="generated/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="lib" path="handwritten/java/org/molgenis/plugins/DatabaseLogin.java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
