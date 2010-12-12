@@ -5,6 +5,5 @@
 	<classpathentry kind="src" path="generated/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-	<classpathentry kind="lib" path="handwritten/java/org/molgenis/plugins/DatabaseLogin.java"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
