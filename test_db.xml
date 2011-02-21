@@ -141,6 +141,7 @@ fixme: test meta model on dubplicate fields (or implement override)
 	<module name="inheritance">
 		<entity name="interfaceC" abstract="true">
 			<field name="nameC" label="Name C" type="varchar" />
+			<field name="xrefC" type="xref" xref_entity="VarcharEntity"/>
 		</entity>
 		<entity name="ClassA">
 			<field name="id" type="autoid" />

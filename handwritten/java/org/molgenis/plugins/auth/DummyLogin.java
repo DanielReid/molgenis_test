@@ -6,6 +6,7 @@ import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.QueryRule;
 import org.molgenis.framework.security.Login;
+import org.molgenis.framework.ui.ScreenModel;
 import org.molgenis.util.Entity;
 
 
@@ -89,7 +90,14 @@ public class DummyLogin implements Login
 	}
 
 	@Override
-	public QueryRule getRowlevelSecurityFilters(Class klazz)
+	public boolean canRead(ScreenModel<?> screen) throws DatabaseException
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public QueryRule getRowlevelSecurityFilters(Class<? extends Entity> klazz)
 	{
 		// TODO Auto-generated method stub
 		return null;
