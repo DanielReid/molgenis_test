@@ -142,7 +142,7 @@ public class TestDatabase extends TestCase
 			assertEquals(x1.getReadonlyXref(), v.getId());
 
 			// check label
-			assertEquals(x1.getNormalXref_normalVarchar(), v.getNormalVarchar());
+			assertEquals(x1.getNormalXref_NormalVarchar(), v.getNormalVarchar());
 
 			// create invalid xref
 			try
@@ -199,7 +199,7 @@ public class TestDatabase extends TestCase
 			assertEquals(x1.getNormalMref().get(0), v.getId());
 
 			// check label
-			assertEquals(x1.getNillableMref_normalVarchar().get(0), v.getNormalVarchar());
+			assertEquals(x1.getNillableMref_NormalVarchar().get(0), v.getNormalVarchar());
 
 			// create invalid xref
 			try
