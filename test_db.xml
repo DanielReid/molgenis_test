@@ -170,7 +170,9 @@ fixme: test meta model on dubplicate fields (or implement override)
 		</entity>
 		<entity name="DextendsBimplementsA" extends="BimplementsA">
 			<field name="fieldD" type="string" />
+<!-- 			
 			<unique fields="fieldD,__Type" description="known problem with constraint between classes" />
+ -->
 		</entity>
 		<entity name="guessMe">
 			<field name="thename"/>

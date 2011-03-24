@@ -5,7 +5,7 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/handwritten/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/generated/sql"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/generated/java"/>
-        <dependent-module archiveName="molgenis.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/molgenis/molgenis">
+        <dependent-module archiveName="molgenis_JPA.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/molgenis_JPA/molgenis_JPA">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="build/classes"/>

@@ -185,9 +185,9 @@ public class TestDatabase extends TestCase
 			// create valid xref
 			MrefEntity x1 = new MrefEntity();
 			x1.setName("test");
-			x1.getNormalMref().add(v.getId());
+			x1.getNormalMref().add(v);
 			//shorthand for x1.setNormalXref(v.getId());
-			x1.getNillableMref().add(v.getId());
+			x1.getNillableMref().add(v);
 
 			db.add(x1);
 
@@ -204,7 +204,7 @@ public class TestDatabase extends TestCase
 			// create invalid xref
 			try
 			{
-				x1.getNormalMref().add(-1);
+				//x1.getNormalMref().re;
 				db.update(x1);
 				fail("updated invalid xref");
 

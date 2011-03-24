@@ -21,7 +21,7 @@
 # Should be jndi loaded!
 map:database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://localhost/test_molgenis_test";
+	d2rq:jdbcDSN "jdbc:mysql://localhost/molgenis_test";
 	d2rq:username "molgenis";
 	d2rq:password "molgenis";
 	jdbc:autoReconnect "true";
@@ -908,6 +908,14 @@ map:BimplementsA_id a d2rq:PropertyBridge;
 	d2rq:column "BimplementsA.id";
 	d2rq:datatype xsd:int;
 	.
+map:BimplementsA_fieldA a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:BimplementsA;
+	d2rq:property vocab:BimplementsA_fieldA;
+	d2rq:propertyDefinitionLabel "fieldA";
+	d2rq:propertyDefinitionComment "fieldA";
+	d2rq:column "BimplementsA.fieldA";
+	d2rq:datatype xsd:string;
+	.
 # Entity CimplementsA
 map:CimplementsA a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
@@ -939,6 +947,14 @@ map:CimplementsA_id a d2rq:PropertyBridge;
 	d2rq:column "CimplementsA.id";
 	d2rq:datatype xsd:int;
 	.
+map:CimplementsA_fieldA a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:CimplementsA;
+	d2rq:property vocab:CimplementsA_fieldA;
+	d2rq:propertyDefinitionLabel "fieldA";
+	d2rq:propertyDefinitionComment "fieldA";
+	d2rq:column "CimplementsA.fieldA";
+	d2rq:datatype xsd:string;
+	.
 # Entity DextendsBimplementsA
 map:DextendsBimplementsA a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
@@ -969,14 +985,6 @@ map:DextendsBimplementsA_id a d2rq:PropertyBridge;
 	d2rq:propertyDefinitionComment "id";
 	d2rq:column "DextendsBimplementsA.id";
 	d2rq:datatype xsd:int;
-	.
-map:DextendsBimplementsA___Type a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:DextendsBimplementsA;
-	d2rq:property vocab:DextendsBimplementsA___Type;
-	d2rq:propertyDefinitionLabel "__Type";
-	d2rq:propertyDefinitionComment "Subtypes have to be set to allow searching";
-	d2rq:column "DextendsBimplementsA.__Type";
-	d2rq:datatype xsd:string;
 	.
 # Entity guessMe
 map:guessMe a d2rq:ClassMap;
