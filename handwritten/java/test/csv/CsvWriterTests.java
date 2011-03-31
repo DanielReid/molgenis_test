@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.model.MolgenisModelException;
-import  org.molgenis.model.elements.Entity;
+import org.molgenis.util.Entity;
 
 import molgenis_test.fields.VarcharEntity;
 import app.CsvExport;
