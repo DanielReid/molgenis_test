@@ -13,7 +13,7 @@
 	<description>Users known within this MOLGENIS. May be derived from another authentication source at first login like LDAP.</description>
 		<field name="id" type="autoid" />
 		<field name="name" unique="true" />
-		<field name="password" type="string" description="big fixme: password type"/>
+		<field name="password_" type="string" description="big fixme: password type"/>
 		<field name="emailaddress" type="string" unique="true"/>
 		<field name="activationCode" type="string" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
 		<field name="active" type="bool" default="false" description="Boolean to indicate if this account can be used to login" />
