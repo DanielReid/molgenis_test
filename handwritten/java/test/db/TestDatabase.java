@@ -1,6 +1,5 @@
 package test.db;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -24,6 +23,7 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.Entity;
 
 import app.JDBCDatabase;
+import app.servlet.MolgenisServlet;
 
 
 public class TestDatabase extends TestCase
@@ -35,19 +35,10 @@ public class TestDatabase extends TestCase
 	{
 		try
 		{
-			db = new JDBCDatabase("molgenis.properties");
+			MolgenisServlet m = new MolgenisServlet();
+			db = (JDBCDatabase) m.getDatabase();
 		}
-		catch (FileNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (DatabaseException e)
+		catch (Exception e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();

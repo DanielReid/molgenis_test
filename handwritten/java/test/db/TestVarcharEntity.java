@@ -10,6 +10,7 @@ import molgenis_test.fields.VarcharEntity;
 import org.molgenis.framework.db.DatabaseException;
 
 import app.JDBCDatabase;
+import app.servlet.MolgenisServlet;
 
 public class TestVarcharEntity  extends TestCase
 {
@@ -19,19 +20,10 @@ public class TestVarcharEntity  extends TestCase
 	{
 		try
 		{
-			db = new JDBCDatabase("molgenis.properties");
+			MolgenisServlet m = new MolgenisServlet();
+			db = (JDBCDatabase) m.getDatabase();
 		}
-		catch (FileNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (DatabaseException e)
+		catch (Exception e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
