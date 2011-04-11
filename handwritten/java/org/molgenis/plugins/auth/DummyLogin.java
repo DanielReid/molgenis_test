@@ -103,4 +103,10 @@ public class DummyLogin implements Login
 		return null;
 	}
 
+	@Override
+	public String getRedirect() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
