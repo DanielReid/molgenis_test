@@ -39,7 +39,7 @@
 		</condition>
 
 		<!-- check if molgenis is compiled into ../molgenis/bin, otherwise compile now -->
-		<javac srcdir="${molgenis.dir}/src" destdir="${build.dir}" nowarn="on">
+		<javac srcdir="${molgenis.dir}/src" destdir="${build.dir}" nowarn="on" debug="true">
 			<classpath refid="molgenis.classpath" />
 		</javac>
 
@@ -57,7 +57,7 @@
 
 	<target name="compile" depends="generate">
 		<!-- compile the generated results -->
-		<javac srcdir="${output_src}:${output_hand}" destdir="${build.dir}" nowarn="on">
+		<javac srcdir="${output_src}:${output_hand}" destdir="${build.dir}" nowarn="on" debug="true">
 			<classpath refid="molgenis.classpath" />
 		</javac>
 
@@ -72,10 +72,15 @@
 	<target name="test" depends="compile">
 		<!-- run the tests -->
 		<testng classpathref="molgenis.classpath" outputDir="${testng.report.dir}" haltOnFailure="true">
-			<xmlfileset dir="${build.dir}" includes="testng.xml" />
+			<xmlfileset dir="${build.dir}" includes="testng1.xml" />
 			<jvmarg value="-ea" />
 		</testng>
-
+		<testng classpathref="molgenis.classpath" outputDir="${testng.report.dir}" haltOnFailure="true">
+			<xmlfileset dir="${build.dir}" includes="testng2.xml" />
+			<jvmarg value="-ea" />
+		</testng>
+		
+		
 		<junitreport todir="${testng.report.dir}">
 			<fileset dir="${testng.report.dir}">
 				<include name="*/*.xml" />

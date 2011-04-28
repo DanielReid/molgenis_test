@@ -210,12 +210,14 @@ fixme: test meta model on dubplicate fields (or implement override)
 			<field name="multicol" type="xref" xref_entity="SimpleCompositKey"
 				xref_label="key1,key2" />
 		</entity>
+<!-- 
 		<entity name="XrefMulticolXref">
 			<field name="id" type="autoid" />
 			<field name="name" />
 			<field name="multicol" type="xref" xref_entity="XrefCompositKey"
 				xref_label="investigation_name,name" />
 		</entity>
+		 -->
 	</module>
 	<!--
 		entity name="ImageEntity"> <field name="id" type="autoid" /> <field

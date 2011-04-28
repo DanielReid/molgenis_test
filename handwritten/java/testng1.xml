@@ -5,10 +5,6 @@
   	   <class name="test.TestDatabase" />
     </classes>
   </test>
-  <test name="Second test">
-    <classes>
-       <class name="test.TestCsv" />
-    </classes>
-  </test>
+
     
 </suite>

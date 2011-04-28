@@ -7,21 +7,21 @@ import java.util.List;
 import junit.framework.TestCase;
 import molgenis_test.fields.VarcharEntity;
 
+import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 
-import app.JDBCDatabase;
 import app.servlet.MolgenisServlet;
 
 public class TestVarcharEntity  extends TestCase
 {
-	JDBCDatabase db = null;
+	Database db = null;
 	
 	public void setUp()
 	{
 		try
 		{
 			MolgenisServlet m = new MolgenisServlet();
-			db = (JDBCDatabase) m.getDatabase();
+			db = m.getDatabase();
 		}
 		catch (Exception e)
 		{

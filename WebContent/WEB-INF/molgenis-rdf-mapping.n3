@@ -21,7 +21,7 @@
 # Should be jndi loaded!
 map:database a d2rq:Database;
 	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://localhost/molgenis_test";
+	d2rq:jdbcDSN "jdbc:mysql://localhost/test_molgenis_test";
 	d2rq:username "molgenis";
 	d2rq:password "molgenis";
 	jdbc:autoReconnect "true";
@@ -1195,43 +1195,4 @@ map:SimpleMulticolXref_multicol a d2rq:PropertyBridge;
 	d2rq:propertyDefinitionComment "multicol";
 	d2rq:refersToClassMap map:SimpleCompositKey;
 	d2rq:join "SimpleMulticolXref.multicol => SimpleCompositKey.id";
-	.
-# Entity XrefMulticolXref
-map:XrefMulticolXref a d2rq:ClassMap;
-	d2rq:dataStorage map:database;
-	d2rq:uriPattern "XrefMulticolXref/@@XrefMulticolXref.id@@";
-	d2rq:class vocab:XrefMulticolXref;
-	d2rq:classDefinitionLabel "";
-	d2rq:classDefinitionComment "";
-	.	
-# todo: use the xref labels if they are complete
-# label for XrefMulticolXref using primary key
-map:XrefMulticolXref__label a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:XrefMulticolXref;
-	d2rq:property rdfs:label;
-	d2rq:pattern "XrefMulticolXref #@@XrefMulticolXref.id@@";
-	.
-map:XrefMulticolXref_id a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:XrefMulticolXref;
-	d2rq:property vocab:XrefMulticolXref_id;
-	d2rq:propertyDefinitionLabel "id";
-	d2rq:propertyDefinitionComment "id";
-	d2rq:column "XrefMulticolXref.id";
-	d2rq:datatype xsd:int;
-	.
-map:XrefMulticolXref_name a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:XrefMulticolXref;
-	d2rq:property vocab:XrefMulticolXref_name;
-	d2rq:propertyDefinitionLabel "name";
-	d2rq:propertyDefinitionComment "name";
-	d2rq:column "XrefMulticolXref.name";
-	d2rq:datatype xsd:string;
-	.
-map:XrefMulticolXref_multicol a d2rq:PropertyBridge;
-	d2rq:belongsToClassMap map:XrefMulticolXref;
-	d2rq:property vocab:XrefMulticolXref_multicol;
-	d2rq:propertyDefinitionLabel "multicol";
-	d2rq:propertyDefinitionComment "multicol";
-	d2rq:refersToClassMap map:XrefCompositKey;
-	d2rq:join "XrefMulticolXref.multicol => XrefCompositKey.id";
 	.

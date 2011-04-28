@@ -19,16 +19,16 @@ import molgenis_test.fields.VarcharEntity;
 import molgenis_test.fields.XrefEntity;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.util.Entity;
 
-import app.JDBCDatabase;
 import app.servlet.MolgenisServlet;
 
 
 public class TestDatabase extends TestCase
 {
-	JDBCDatabase db = null;
+	Database db = null;
 	Logger logger = Logger.getLogger(TestDatabase.class);
 
 	public void setUp()
@@ -36,7 +36,7 @@ public class TestDatabase extends TestCase
 		try
 		{
 			MolgenisServlet m = new MolgenisServlet();
-			db = (JDBCDatabase) m.getDatabase();
+			db = m.getDatabase();
 		}
 		catch (Exception e)
 		{
@@ -176,9 +176,9 @@ public class TestDatabase extends TestCase
 			// create valid xref
 			MrefEntity x1 = new MrefEntity();
 			x1.setName("test");
-			x1.getNormalMref().add(v.getId());
+			x1.getNormalMref_Id().add(v.getId());
 			//shorthand for x1.setNormalXref(v.getId());
-			x1.getNillableMref().add(v.getId());
+			x1.getNormalMref_Id().add(v.getId());
 
 			db.add(x1);
 

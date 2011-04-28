@@ -5,7 +5,6 @@ import java.io.File;
 import org.molgenis.framework.db.Database;
 
 import app.CsvImport;
-import app.JDBCDatabase;
 import app.servlet.MolgenisServlet;
 
 public class TestMrefImport
@@ -16,11 +15,11 @@ public class TestMrefImport
 	{
 		File directory = new File(TestMrefImport.class.getResource("").getFile());
 		System.out.println("Importing from dir "+directory);
-		JDBCDatabase db = null;
+		Database db = null;
 		try
 		{
 			MolgenisServlet m = new MolgenisServlet();
-			db = (JDBCDatabase) m.getDatabase();
+			db = (Database) m.getDatabase();
 		}
 		catch (Exception e)
 		{

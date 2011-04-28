@@ -7,7 +7,7 @@
     		<form name="SimpleCompositKeys" entity="SimpleCompositKey"/>
     		<form name="XrefCompositKeys" entity="XrefCompositKey"/>
     		<form name="SimpleMulticolXrefs" entity="SimpleMulticolXref"/>
-    		<form name="XrefMulticolXrefs" entity="XrefMulticolXref"/>
+    		<!-- <form name="XrefMulticolXrefs" entity="XrefMulticolXref"/> -->
     	</menu>
 
         <!--plugin name="Login" type="org.molgenis.plugins.LoginScreen"/-->
