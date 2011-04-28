@@ -73,7 +73,11 @@
 	<target name="test" depends="compile">
 		<!-- run the tests -->
 		<testng classpathref="molgenis.classpath" outputDir="${testng.report.dir}" haltOnFailure="true">
-			<xmlfileset dir="${build.dir}" includes="testng.xml" />
+			<xmlfileset dir="${build.dir}" includes="testng1.xml" />
+			<jvmarg value="-ea" />
+		</testng>
+		<testng classpathref="molgenis.classpath" outputDir="${testng.report.dir}" haltOnFailure="true">
+			<xmlfileset dir="${build.dir}" includes="testng2.xml" />
 			<jvmarg value="-ea" />
 		</testng>
 
