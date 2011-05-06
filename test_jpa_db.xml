@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+	<!--fixme: default should of right type-->
+	<!--fixme: decimal precision -->
+	<!--
+fixme: setting sizes of values (or even more advanced constraints)
+-->
+	<!--fixme: check whether enum_options has []-->
+	<!--fixme: how to nill a file?-->
+	<!--fixme: parentrules should be solved in dsl-->
+	<!--fixme: lookup labels in record view-->
+	<!--
+		fixme: make getValue() in input behave as object(?), wait for date to be
+		sure...
+	-->
+	<!--
+fixme: test meta model on dubplicate fields (or implement override)
+-->
+<molgenis name="molgenis_test" label="MOLGENIS test database" version="0.0.1">
+	<description>
+		This is a test database with
+		<ul>
+			<li> most of the data types and constructs currently known inside MOLGENIS
+			</li>
+			<li> examples of interfaces and inheritance</li>
+		</ul>
+	</description>
+	<module name="fields">
+		<entity name="VarcharEntity">
+			<field name="id" type="autoid" />
+			<field name="normalVarchar" label="Normal Varchar" type="varchar"
+				unique="true" length="127" />
+			<field name="readonlyVarchar" label="Readonly Varchar" type="varchar"
+				readonly="true" default="readonly default"/>
+			<field name="nillableVarchar" label="Nillable Varchar" type="varchar"
+				nillable="true" />
+			<field name="defaultVarchar" label="Defaulted Varchar" type="varchar"
+				default="1" />
+		</entity>
+		<entity name="XrefEntity">
+			<field name="id" type="autoid" />
+			<field name="normalXref" label="Normal Xref" type="xref" xref_entity="VarcharEntity"
+				xref_field="id" xref_label="normalVarchar" />
+			<field name="readonlyXref" label="Readonly Xref" type="xref" readonly="true"
+				xref_entity="VarcharEntity" xref_field="id" xref_label="normalVarchar" />
+			<field name="nillableXref" label="Nillable Xref" type="xref" nillable="true"
+				xref_entity="VarcharEntity" xref_field="id" xref_label="normalVarchar" />
+		</entity>
+		<entity name="TreeEntity">
+			<field name="id" type="autoid" />
+			<field name="name" type="varchar" unique="true" />
+			<field name="parent" type="xref" nillable="true" xref_entity="TreeEntity"
+				xref_field="id" xref_label="name" />
+		</entity>
+		<entity name="DateEntity">
+			<field name="id" type="autoid" />
+			<field name="normalDate" label="Normal Date" type="date" />
+			<field name="readonlyDate" label="Readonly Date" type="date" readonly="true" />
+			<field name="nillableDate" label="Nillable Date" type="date" nillable="true" />
+			<field name="autoDate" label="Auto Date" type="date" auto="true" />
+			<field name="defaultDate" label="Default Date" type="date" default="2006-02-25" />
+		</entity>
+		<entity name="DateTimeEntity">
+			<field name="id" type="autoid" />
+			<field name="normalDateTime" label="Normal DateTime" type="datetime" />
+			<field name="readonlyDateTime" label="Readonly DateTime" type="datetime"
+				readonly="true" />
+			<field name="nillableDateTime" label="Nillable DateTime" type="datetime"
+				nillable="true" />
+			<field name="autoDateTime" label="Auto DateTime" type="datetime" auto="true" />
+			<field name="defaultDateTime" label="Default DateTime" type="datetime"
+				default="2006-02-25 19:20:19" />
+		</entity>
+		<entity name="MrefEntity">
+			<field name="id" type="autoid" />
+			<field name="name" description="At least one normal field is required..." />
+			<field name="normalMref" label="Normal Mref" type="mref" xref_entity="VarcharEntity"
+				xref_field="id" xref_label="normalVarchar" />
+			<field name="readonlyMref" label="Readonly Mref" type="mref" readonly="true"
+				xref_entity="VarcharEntity" xref_field="id" xref_label="normalVarchar" />
+			<field name="nillableMref" label="Nillable Mref" type="mref" nillable="true"
+				xref_entity="VarcharEntity" xref_field="id" xref_label="normalVarchar" />
+		</entity>
+		<entity name="FileEntity">
+			<field name="id" type="autoid" />
+			<field name="normalFile" label="Normal File" type="file" />
+			<field name="readonlyFile" label="Readonly File" type="file" readonly="true" />
+			<field name="nillableFile" label="Nillable File" type="file" nillable="true" />
+		</entity>
+		<entity name="EnumEntity">
+			<field name="id" type="autoid" />
+			<field name="normalEnum" label="Normal Enum" type="enum" enum_options="[a,b,c]" />
+			<field name="readonlyEnum" label="Readonly Enum" type="enum" readonly="true"
+				enum_options="[a,b,c]" />
+			<field name="nillableEnum" label="Nillable Enum" type="enum" nillable="true"
+				enum_options="[a,b,c]" />
+			<field name="defaultEnum" label="Defaulted Enum" type="enum" default="b"
+				enum_options="[a,b,c]" />
+		</entity>
+		<entity name="DecimalEntity">
+			<field name="id" type="autoid" />
+			<field name="normalDecimal" label="Normal Decimal" type="decimal" />
+			<field name="readonlyDecimal" label="Readonly Decimal" type="decimal"
+				readonly="true" />
+			<field name="nillableDecimal" label="Nillable Decimal" type="decimal"
+				nillable="true" />
+			<field name="defaultDecimal" label="Defaulted Decimal" type="decimal"
+				default="2.0" />
+		</entity>
+		<entity name="BoolEntity">
+			<field name="id" type="autoid" />
+			<field name="normalBool" label="Normal Bool" type="bool" />
+			<field name="readonlyBool" label="Readonly Bool" type="bool" readonly="true" />
+			<field name="nillableBool" label="Nillable Bool" type="bool" nillable="true" />
+			<field name="defaultBool" label="Defaulted Bool" type="bool" default="true" />
+		</entity>
+		<entity name="IntEntity">
+			<field name="id" type="autoid" />
+			<field name="normalInt" label="Normal Int" type="int" />
+			<field name="readonlyInt" label="Readonly Int" type="int" readonly="true" default="1"/>
+			<field name="nillableInt" label="Nillable Int" type="int" nillable="true" />
+			<field name="defaultInt" label="Defaulted Bool" type="int" default="1" />
+		</entity>
+		<entity name="HiddenId">
+			<field name="id" type="autoid" hidden="true" />
+			<field name="normalVarchar" label="Normal Varchar" type="varchar" />
+			<field name="readonlyVarchar" label="Readonly Varchar" type="varchar"
+				readonly="true" />
+			<field name="nillableVarchar" label="Nillable Varchar" type="varchar"
+				nillable="true" />
+			<field name="defaultVarchar" label="Defaulted Varchar" type="varchar"
+				default="1" />
+		</entity>
+		<entity name="TextEntity">
+			<field name="id" type="autoid" />
+			<field name="normalText" label="Normal Text" type="text" />
+			<field name="readonlyText" label="Readonly Text" type="text" readonly="true" />
+			<field name="nillableText" label="Nillable Text" type="text" nillable="true" />
+			<field name="defaultText" label="Defaulted Text" type="text" default="1" />
+		</entity>
+	</module>
+	<module name="inheritance">
+		<entity name="interfaceC" abstract="true">
+			<field name="nameC" label="Name C" type="varchar" />
+			<field name="xrefC" type="xref" xref_entity="VarcharEntity"/>
+		</entity>
+		<entity name="ClassA">
+			<field name="id" type="autoid" />
+			<field name="fieldA" type="string" />
+			<unique fields="fieldA" subclass="true" />
+		</entity>
+		<entity name="BextendsA" extends="ClassA">
+			<field name="fieldB" type="string" />
+		</entity>
+		<entity name="CextendsA" extends="ClassA">
+			<field name="fieldC" type="string" />
+		</entity>
+		<entity name="DextendsB" extends="BextendsA">
+			<field name="fieldD" type="string" />
+		</entity>
+		<entity name="InterfaceA" abstract="true">
+			<field name="id" type="autoid" />
+			<field name="fieldA" type="string" unique="true" />
+		</entity>
+		<entity name="BimplementsA" implements="InterfaceA">
+			<field name="fieldB" type="string" />
+			<field name="IssueType" description="Issue" />
+		</entity>
+		<entity name="CimplementsA" implements="InterfaceA">
+			<field name="fieldC" type="string" />
+		</entity>
+		<entity name="DextendsBimplementsA" extends="BimplementsA">
+			<field name="fieldD" type="string" />
+<!-- 			
+			<unique fields="fieldD,__Type" description="known problem with constraint between classes" />
+ -->
+		</entity>
+		<entity name="guessMe">
+			<field name="thename"/>
+			<field name="guessMeId" type="autoid" />
+		</entity>
+		<entity name="GuessMeXref">
+			<field name="guessMeXrefId" type="autoid" />
+			<field name="guessMeId" type="int" />
+		</entity>
+	</module>
+	<module name="composit_labels">
+		<entity name="Investigation" xref_label="name">
+			<field name="id" type="autoid" />
+			<field name="name" unique="true" />
+		</entity>
+		<entity name="SimpleCompositKey">
+			<description>Test reference for composit keys without them being xrefs
+				themselfs</description>
+			<field name="id" type="autoid" />
+			<field name="key1" />
+			<field name="key2" />
+			<unique fields="key1,key2" />
+		</entity>
+		<entity name="XrefCompositKey">
+			<description>Test reference for composit keys with one of them being xref
+				themselfs</description>
+			<field name="id" type="autoid" />
+			<field name="investigation" type="xref" xref_entity="Investigation" />
+			<field name="name" />
+			<unique fields="investigation,name" />
+		</entity><!--
+		<entity name="SimpleMulticolXref">
+			<field name="id" type="autoid" />
+			<field name="name" />
+			<field name="multicol" type="xref" xref_entity="SimpleCompositKey"
+				xref_label="key1,key2" />
+		</entity>
+--><!-- 
+		<entity name="XrefMulticolXref">
+			<field name="id" type="autoid" />
+			<field name="name" />
+			<field name="multicol" type="xref" xref_entity="XrefCompositKey"
+				xref_label="investigation_name,name" />
+		</entity>
+		 -->
+	</module>
+	<!--
+		entity name="ImageEntity"> <field name="id" type="autoid" /> <field
+		name="normalImage" label="Normal Image" type="image" /> <field
+		name="readonlyImage" label="Readonly Image" type="image" readonly="true" />
+		<field name="nillableImage" label="Nillable Image" type="image"
+		nillable="true" /> </entity
+	-->
+	<!--
+		entity name="DecoratedEntity" decorator="test.decorators.MyDecorator2"> <field
+		name="id" type="autoid" /> <field name="triggeredField" description="Trigger
+		will put something here..." /> </entity
+	-->
+</molgenis>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<molgenis name="molgenis_test">
+	<plugin name="Header" type="org.molgenis.plugins.MolgenisHeader"/>
+    <menu name="Main" position="left">
+    	<menu name="CompositeKeys">
+    		<form name="Investigations" entity="Investigation"/>
+    		<form name="SimpleCompositKeys" entity="SimpleCompositKey"/>
+    		<form name="XrefCompositKeys" entity="XrefCompositKey"/>
+    		<!--<form name="SimpleMulticolXrefs" entity="SimpleMulticolXref"/>-->
+    		<!-- <form name="XrefMulticolXrefs" entity="XrefMulticolXref"/> -->
+    	</menu>
+
+        <!--plugin name="Login" type="org.molgenis.plugins.LoginScreen"/-->
+        <menu name="Security">
+            <form name="Users" entity="MolgenisUser"/>
+            <form name="GroupsAndPermissions" entity="MolgenisUserGroup"/>
+            <!--form name="SecuredEntity" entity="SecuredEntity"/-->
+        </menu>
+        <form name="Varchars2" entity="VarcharEntity" view="record">
+            <form name="XrefsForVarchar" entity="XrefEntity" view="list"/>
+            <form name="MrefsForVarchar" entity="MrefEntity" view="list"/>
+        </form>
+        <!-- decorator="test.actions.MyDialogAction" />-->
+        <form name="Xrefs2" entity="XrefEntity" view="record">
+            <form name="XrefRelatedVarchars" entity="VarcharEntity" view="list"/>
+        </form>
+        <form name="Mrefs2" entity="MrefEntity" view="record">
+            <form name="MrefRelatedVarchars" entity="VarcharEntity" view="list"/>
+        </form>
+        <menu name="FieldTypes">
+            <!-- form name="Images" entity="ImageEntity" view="record" / -->
+            <form name="Varchars" entity="VarcharEntity" view="record"/>
+            <form name="Ints" entity="IntEntity" view="record"/>
+            <form name="Decimals" entity="DecimalEntity" view="record"/>
+            <form name="Bools" entity="BoolEntity" view="record"/>
+            <form name="Texts" entity="TextEntity" view="record"/>
+            <form name="Dates" entity="DateEntity" view="record"/>
+            <form name="DateTimes" entity="DateTimeEntity" view="record"/>
+            <form name="Enums" entity="EnumEntity" view="record"/>
+            <form name="Mrefs" entity="MrefEntity" view="record"/>
+            <form name="Files" entity="FileEntity" view="record"/>
+        </menu>
+        <menu name="Xrefs">
+            <form name="HiddenId" entity="HiddenId"/>
+            <form name="XrefViaSubform" entity="VarcharEntity">
+                <form name="XrefSubform" entity="XrefEntity"/>
+            </form>
+            <form name="XrefViaSubformWithMenu" entity="VarcharEntity">
+                <menu name="TestSubMenu">
+                    <form name="TestSubForm1" entity="XrefEntity"/>
+                    <form name="TestSubForm2" entity="XrefEntity"/>
+                </menu>
+            </form>
+            <form name="MrefViaSubform" entity="VarcharEntity">
+                <form name="MrefSubform" entity="MrefEntity"/>
+            </form>
+        </menu>
+        
+        <!--tree name="testTree" entity="TestTree" parentfield="parent"
+        idfield="id" labelfield="name"/><plugin name="testPlugin"/-->
+        
+        <menu name="ExtendEntities">
+            <form name="ClassA" entity="ClassA"/>
+            <form name="BextendsA" entity="BextendsA"/>
+            <form name="CextendsA" entity="CextendsA"/>
+            <form name="DextendsB" entity="DextendsB"/>
+        </menu>
+        <menu name="AbstractEntities">
+            <form name="BimplementsA" entity="BimplementsA"/>
+            <form name="CimplementsA" entity="CimplementsA"/>
+            <form name="DextendsBimplementsA" entity="DextendsBimplementsA"/>
+        </menu>
+        <menu name="CustomHtmlHeaders">
+        	<plugin name="CustomHtmlHeaders1" type="plugins.customhtmlheaders.CustomHtmlHeaders1"/>
+        	<plugin name="CustomHtmlHeaders2" type="plugins.customhtmlheaders.CustomHtmlHeaders2"/>
+        	<plugin name="CustomHtmlHeaders3" type="plugins.customhtmlheaders.CustomHtmlHeaders3">
+        		<plugin name="CustomHtmlHeaders3_2" type="plugins.customhtmlheaders.CustomHtmlHeaders2"/>
+        	</plugin>
+        </menu>
+        <!--
+        <form name="DecoratedEntity" entity="DecoratedEntity" /> <plugin
+        name="Mart" type="org.molgenis.plugins.mart.MartPlugin"/> <plugin
+        name="FileDownloadPlugin"
+        type="org.molgenis.plugins.examples.file.DownloadPlugin"/>
+        -->
+    </menu>
+</molgenis>
