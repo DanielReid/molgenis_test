@@ -33,7 +33,7 @@ public class DownloadPlugin extends PluginModel
 		this.fileEntities = fileEntities;
 	}
 
-	public DownloadPlugin(String name, ScreenModel parent)
+	public DownloadPlugin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}

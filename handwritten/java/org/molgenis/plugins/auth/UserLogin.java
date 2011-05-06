@@ -8,13 +8,13 @@
 package org.molgenis.plugins.auth;
 
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.ui.ScreenModel;
 import org.molgenis.framework.ui.PluginModel;
+import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Tuple;
 
 public class UserLogin extends PluginModel
 {
-	public UserLogin(String name, ScreenModel parent)
+	public UserLogin(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}

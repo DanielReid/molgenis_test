@@ -8,8 +8,8 @@
 package org.molgenis.plugins;
 
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.ui.ScreenModel;
 import org.molgenis.framework.ui.PluginModel;
+import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Tuple;
 
 /**
@@ -21,7 +21,7 @@ import org.molgenis.util.Tuple;
  */
 public class MolgenisHeader extends PluginModel
 {
-	public MolgenisHeader(String name, ScreenModel parent)
+	public MolgenisHeader(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}

@@ -8,13 +8,13 @@
 package plugins.customhtmlheaders;
 
 import org.molgenis.framework.db.Database;
-import org.molgenis.framework.ui.ScreenModel;
 import org.molgenis.framework.ui.PluginModel;
+import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.util.Tuple;
 
 public class CustomHtmlHeaders1 extends PluginModel
 {
-	public CustomHtmlHeaders1(String name, ScreenModel parent)
+	public CustomHtmlHeaders1(String name, ScreenController<?> parent)
 	{
 		super(name, parent);
 	}
