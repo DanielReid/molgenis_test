@@ -1,6 +1,8 @@
 <!-- this ant script allows you to run the molgenis generator from the commandline-->
 <project default="test">
-	<property file="molgenis.test.jpa.properties" />
+	
+	<property name="project.properties" value="molgenis.test.jpa.properties" />
+	<property file="${project.properties}"/>
 	<property name="molgenis.dir" value="../molgenis" />
 	<property name="build.dir" value="build/classes" />
 	<property name="testng.report.dir" value="test-output" />
@@ -50,7 +52,7 @@
 		<!-- call the generator -->
 		<java classname="org.molgenis.Molgenis" fork="yes" failonerror="true">
 			<classpath refid="molgenis.classpath" />
-			<arg value="molgenis.test.properties" />
+			<arg value="${project.properties}" />
 		</java>
 
 	</target>
