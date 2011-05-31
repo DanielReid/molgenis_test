@@ -104,7 +104,7 @@ public class DummyLogin implements Login
 	}
 
 	@Override
-	public boolean canRead(ScreenModel model) throws DatabaseException {
+	public boolean canRead(ScreenController controller) throws DatabaseException {
 		// TODO Auto-generated method stub
 		return false;
 	}
