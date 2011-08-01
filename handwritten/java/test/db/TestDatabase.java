@@ -45,38 +45,32 @@ public class TestDatabase extends TestCase
 		}
 	}
 
-	public void testVarchar() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testVarchar() throws Exception
 	{
 		helper(VarcharEntity.class, "varchar", "test1", "test2", "1");
 	}
 
-	public void testText() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testText() throws Exception
 	{
 		helper(TextEntity.class, "text", "test1", "test2", "1");
 	}
 
-	public void testInt() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testInt() throws Exception
 	{
 		helper(IntEntity.class, "int", 1, 2, 1);
 	}
 
-	public void testDecimal() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testDecimal() throws Exception
 	{
 		helper(DecimalEntity.class, "decimal", 1.0, 2.0, 2.0);
 	}
 
-	public void testBool() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testBool() throws Exception
 	{
 		helper(BoolEntity.class, "bool", true, true, true);
 	}
 
-	public void testEnum() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testEnum() throws Exception
 	{
 		helper(EnumEntity.class, "enum", "a", "b", "b");
 	}
@@ -93,8 +87,7 @@ public class TestDatabase extends TestCase
 //		helper(DateEntity.class, "date", "Jan 1, 2001", "Jan 2, 2001", DateEntity.string2date("Feb 25, 2006"));
 //	}
 
-	public void testDateTime() throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+	public void testDateTime() throws Exception
 	{
 		DateFormat formatter = new SimpleDateFormat("MMMM d, yyyy, hh:mm:ss", Locale.US);
 		formatter.setTimeZone(TimeZone.getDefault());
@@ -218,8 +211,7 @@ public class TestDatabase extends TestCase
 
 	// uses find, count, add, update, remove
 	private <E extends Entity> void helper(Class<E> entityClass, String type, Object value1, Object value2,
-			Object defaultValue) throws DatabaseException, IOException, ParseException, InstantiationException,
-			IllegalAccessException
+			Object defaultValue) throws Exception
 	{
 
 		// cleanup
