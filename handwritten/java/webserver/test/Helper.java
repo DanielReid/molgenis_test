@@ -26,21 +26,6 @@ public class Helper {
 		}
 	}
 
-	public static void deleteStorage() throws Exception {
-		// get storage folder and delete it completely
-		// throws exceptions if anything goes wrong
-		Database db = new MolgenisServlet().getDatabase();
-		int appNameLength = MolgenisServlet.getMolgenisVariantID().length();
-		String storagePath = db.getFileSourceHelper().getFilesource(true)
-				.getAbsolutePath();
-		File storageRoot = new File(storagePath.substring(0,
-				storagePath.length() - appNameLength));
-		System.out.println("Removing content of " + storageRoot);
-		TarGz.recursiveDeleteContent(new File(storagePath));
-		System.out.println("Removing folder " + storageRoot);
-		TarGz.delete(storageRoot, false);
-	}
-
 	/**
 	 * Return the initial port number if it was available. Otherwise, increase
 	 * with 1 over a given range until a free port was found. If none are found,
