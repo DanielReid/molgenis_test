@@ -57,7 +57,7 @@ public class DummyLogin implements Login
 	}
 
 	@Override
-	public void logout()
+	public void logout(Database db)
 	{
 		this.name = null;
 	}
