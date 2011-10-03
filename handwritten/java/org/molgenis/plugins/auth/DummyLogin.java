@@ -1,6 +1,7 @@
 package org.molgenis.plugins.auth;
 
 import java.text.ParseException;
+import java.util.List;
 
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -36,7 +37,7 @@ public class DummyLogin implements Login
 	}
 
 	@Override
-	public boolean canRead(Entity entity)
+	public boolean canRead(Entity entity) throws DatabaseException
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -65,15 +66,13 @@ public class DummyLogin implements Login
 	@Override
 	public boolean canRead(Class<? extends Entity> entityClass) throws DatabaseException
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean canWrite(Class<? extends Entity> entityClass) throws DatabaseException
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -104,9 +103,15 @@ public class DummyLogin implements Login
 	}
 
 	@Override
-	public boolean canRead(ScreenController controller) throws DatabaseException {
+	public void setAdmin(List<? extends Entity> entities, Database db)
+			throws DatabaseException {
 		// TODO Auto-generated method stub
-		return false;
+		
+	}
+
+	@Override
+	public boolean canRead(ScreenController<?> screen) throws DatabaseException {
+		return true;
 	}
 
 }
