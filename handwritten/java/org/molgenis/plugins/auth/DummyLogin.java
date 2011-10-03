@@ -114,4 +114,7 @@ public class DummyLogin implements Login
 		return true;
 	}
 
+	@Override
+	public void setRedirect(String redirect) {
+	}
 }
