@@ -49,28 +49,27 @@ public class dataTestMatrix {
 
 	}
 
-	public void getMatrixColumnsIndex() throws IOException {
+	public void getMatrixColumnsIndex() throws Exception {
 		FileInputStream fstream = new FileInputStream(file);
 		DataInputStream in = new DataInputStream(fstream);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String strLine = br.readLine();
-		String[] strLineParts = strLine.split(matrixSeperator);
-		for (int i = 0; i < strLineParts.length; i++) {
-			if (strLineParts[i].split("__").length == 2) {
-				matrixColumnsIndex.put(i, strLineParts[i]);
-			}
+		String[] matrixColumns = strLine.split(matrixSeperator);
+		for (int i = 0; i < matrixColumns.length; i++) {
+			if (matrixColumns[i].length() != 0)
+				matrixColumnsIndex.put(i, matrixColumns[i]);
 		}
 		in.close();
 	}
 
-	public void getDbTablesColumns() {
-
+	public boolean getDbTablesColumns() throws Exception {
+		boolean result = true;
 		for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
 				.entrySet()) {
-			if (matrixColumn.getValue().length() != 0) {
-				String[] matrixColumnParts = matrixColumn.getValue()
-						.split("__");
-				if (matrixColumnParts.length == 2) {
+			String[] matrixColumnParts = matrixColumn.getValue().split("__");
+			if (matrixColumnParts.length == 2) {
+				if (tableColumnExists(sourceOwner, sourceTablePrefix
+						+ matrixColumnParts[0], matrixColumnParts[1])) {
 					if (dbTablesColumns.get(matrixColumnParts[0]) == null) {
 						ArrayList<String> dbColumns = new ArrayList<String>();
 						// for every table add "PA_ID"
@@ -84,15 +83,27 @@ public class dataTestMatrix {
 							dbColumns.add(matrixColumnParts[1]);
 						dbTablesColumns.put(matrixColumnParts[0], dbColumns);
 					}
+				} else {
+					System.out.println("WARNING: '" + sourceTablePrefix
+							+ matrixColumnParts[0] + "." + matrixColumnParts[1]
+							+ "' (based on matrix column) not in source");
+					result = false;
 				}
+			} else {
+				System.out
+						.println("WARNING: '"
+								+ matrixColumn.getValue()
+								+ "' not conform format. (can not extract the source table and column name)");
+				result = false;
 			}
 		}
+		return result;
 	}
 
 	public void makeTables() throws Exception {
 		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
 				.entrySet()) {
-			if (tableExists(entry.getKey(), testOwner))
+			if (tableExists(testOwner, testTablePrefix + entry.getKey()))
 				executeQuery("drop table " + testTablePrefix + entry.getKey());
 			executeQuery("create table " + testTablePrefix + entry.getKey()
 					+ " ("
@@ -101,9 +112,22 @@ public class dataTestMatrix {
 		}
 	}
 
-	boolean tableExists(String table, String owner) throws Exception {
-		ResultSet rset = executeQuery("select count(*) from dba_all_tables where table_name='"
-				+ testTablePrefix + table + "' and owner='" + owner + "'");
+	boolean tableExists(String owner, String table) throws Exception {
+		ResultSet rset = executeQuery("select count(*) from dba_all_tables where owner='"
+				+ owner + "' and table_name='" + table + "'");
+		rset.next();
+		if (rset.getString(1).equals("1"))
+			return true;
+		return false;
+	}
+
+	boolean tableColumnExists(String owner, String table, String column)
+			throws Exception {
+		ResultSet rset = executeQuery("select count(*) from dba_tab_columns where owner='"
+				+ owner
+				+ "' and table_name='"
+				+ table
+				+ "' and column_name = '" + column + "'");
 		rset.next();
 		if (rset.getString(1).equals("1"))
 			return true;
@@ -111,7 +135,7 @@ public class dataTestMatrix {
 	}
 
 	public void makeGlobalTable() throws Exception {
-		if (tableExists(testTablePrefix + "GLOBAL", testOwner))
+		if (tableExists(testOwner, testTablePrefix + "GLOBAL"))
 			executeQuery("drop table " + testTablePrefix + "GLOBAL");
 		executeQuery("create table "
 				+ testTablePrefix
@@ -153,8 +177,8 @@ public class dataTestMatrix {
 					.entrySet()) {
 				values.add("'" + lineParts[matrixColumn.getKey()] + "'");
 			}
-			sql += "UNION ALL SELECT " + Joiner.on(", ").join(values)
-					+ " FROM DUAL\n";
+			sql += "union all select " + Joiner.on(", ").join(values)
+					+ " from dual\n";
 		}
 		in.close();
 		executeQuery(sql);
@@ -172,11 +196,53 @@ public class dataTestMatrix {
 				else
 					combineTableColumn.add(entry.getKey() + "__" + column);
 			}
-			executeQuery("INSERT INTO " + testTablePrefix + entry.getKey()
+			executeQuery("insert into " + testTablePrefix + entry.getKey()
 					+ " (" + Joiner.on(", ").join(entry.getValue())
-					+ ") SELECT " + Joiner.on(", ").join(combineTableColumn)
-					+ " FROM " + testTablePrefix + "GLOBAL");
+					+ ") select " + Joiner.on(", ").join(combineTableColumn)
+					+ " from " + testTablePrefix + "GLOBAL");
 		}
+	}
+
+	public boolean compareTables() throws Exception {
+		boolean result = true;
+		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
+				.entrySet()) {
+			for (String column : entry.getValue()) {
+				ResultSet rset = executeQuery("select count(*) from (select case  when substr("
+						+ column
+						+ ", length("
+						+ column
+						+ ")-1, 2) = '.0'  then substr("
+						+ column
+						+ ", 0, length("
+						+ column
+						+ ")-2) else "
+						+ column
+						+ " end as "
+						+ column
+						+ " from "
+						+ testTablePrefix
+						+ entry.getKey()
+						+ " minus select to_char("
+						+ column
+						+ ") from "
+						+ sourceOwner
+						+ "."
+						+ sourceTablePrefix
+						+ entry.getKey() + ")");
+				rset.next();
+				if (rset.getString(1).equals("0")) {
+					System.out.println("SUCCES " + entry.getKey() + "__"
+							+ column + " data in source (with '.0' fix)");
+				} else {
+					result = false;
+					System.out.println("FAILED datacompare for: "
+							+ entry.getKey() + "__" + column);
+				}
+
+			}
+		}
+		return result;
 	}
 
 	@Test
@@ -184,69 +250,32 @@ public class dataTestMatrix {
 		Locale.setDefault(Locale.US);
 		getMatrixColumnsIndex();
 		getDbTablesColumns();
-		Assert.assertTrue(true);
 	}
 
 	@Test(dependsOnMethods = { "init" })
 	public void testMakeGlobalTable() throws Exception {
-		// makeGlobalTable();
-		Assert.assertTrue(true);
+		makeGlobalTable();
 	}
 
 	@Test(dependsOnMethods = { "testMakeGlobalTable" })
 	public void testFillGlobalTable() throws Exception {
-		// fillGlobalTable();
-		Assert.assertTrue(true);
+		fillGlobalTable();
 	}
 
 	@Test(dependsOnMethods = { "testFillGlobalTable" })
 	public void testMakeTables() throws Exception {
-		// makeTables();
-		Assert.assertTrue(true);
+		makeTables();
 	}
 
 	@Test(dependsOnMethods = { "testMakeTables" })
 	public void testFillTables() throws Exception {
-		// fillTables();
-		Assert.assertTrue(true);
+		fillTables();
 	}
 
 	@Test(dependsOnMethods = { "testFillTables" })
-	public void next() throws Exception {
-		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
-				.entrySet()) {
-			for (String column : entry.getValue()) {
-				try {
-					executeQuery("select count(*) from (select case  when substr("
-							+ column
-							+ ", length("
-							+ column
-							+ ")-1, 2) = '.0'  then substr("
-							+ column
-							+ ", 0, length("
-							+ column
-							+ ")-2) else "
-							+ column
-							+ " end as "
-							+ column
-							+ " from "
-							+ testTablePrefix
-							+ entry.getKey()
-							+ " minus select to_char("
-							+ column
-							+ ") from llpoper."
-							+ sourceTablePrefix
-							+ entry.getKey() + ")");
-					System.out.println("SUCCES " + testTablePrefix
-							+ entry.getKey() + "." + column
-							+ " data in source (with '.0' fix)");
-				} catch (Exception e) {
-					System.out.println(e);
-					// Assert.assertTrue(false);
-				}
-			}
-		}
-		Assert.assertTrue(true);
+	public void testCompareTables() throws Exception {
+		if (compareTables() == false)
+			Assert.assertFalse(true);
 	}
 
 }
