@@ -9,7 +9,7 @@ public class DataTestMatrixLookupTwoFilters {
 	@Test
 	public void init() throws Exception {
 		// TODO: Make Selenium download te Molgenis Matrix export file
-		DataTestMatrix.file = "d:/ll_pheno_quantitatief_two_filters_subset.txt";
+		DataTestMatrix.file = "/pheno_two_filters.txt";
 		DataTestMatrix.getMatrixColumnsIndex();
 		if (DataTestMatrix.getDbTablesColumns() == false)
 			Assert.assertFalse(true);
