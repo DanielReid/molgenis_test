@@ -9,7 +9,7 @@ public class DataTestMatrixLookupComplete {
 	@Test
 	public void init() throws Exception {
 		// TODO: Make Selenium download te Molgenis Matrix export file.
-		DataTestMatrix.file = "d:/ll_pheno_quantitatief.txt";
+		DataTestMatrix.file = "/pheno_complete.txt";
 		DataTestMatrix.getMatrixColumnsIndex();
 		if (DataTestMatrix.getDbTablesColumns() == false)
 			Assert.assertFalse(true);

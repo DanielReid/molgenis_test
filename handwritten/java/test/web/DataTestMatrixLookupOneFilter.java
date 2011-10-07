@@ -9,7 +9,7 @@ public class DataTestMatrixLookupOneFilter {
 	@Test
 	public void init() throws Exception {
 		// TODO: Make Selenium download te Molgenis Matrix export file
-		DataTestMatrix.file = "d:/ll_pheno_quantitatief_one_filter_subset.txt";
+		DataTestMatrix.file = "/pheno_one_filter.txt";
 		DataTestMatrix.getMatrixColumnsIndex();
 		if (DataTestMatrix.getDbTablesColumns() == false)
 			Assert.assertFalse(true);
