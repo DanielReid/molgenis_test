@@ -91,11 +91,15 @@ public class DataTestMatrix {
 					result = false;
 				}
 			} else {
-				System.out
-						.println("WARNING OR POSSIBLE FAIL: '"
-								+ matrixColumn.getValue()
-								+ "' not conform format. (can not extract the source table and column name)");
-				//result = false;
+				if (matrixColumn.getValue().equals("")
+						|| matrixColumn.getValue().equals("ROWNUMBER")) {
+				} else {
+					System.out
+							.println("FAIL: '"
+									+ matrixColumn.getValue()
+									+ "' not conform format. (can not extract the source table and column name)");
+					result = false;
+				}
 			}
 		}
 		return result;
