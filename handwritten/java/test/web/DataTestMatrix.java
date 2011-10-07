@@ -1,22 +1,22 @@
 package test.web;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
-
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import com.google.common.base.Joiner;
 
-import antlr.StringUtils;
-
-public class dataTestMatrix {
-	String file = "d:/ll_pheno_quantitatief.txt";
+public class DataTestMatrix {
+	String file;
 
 	String testTablePrefix = "T2_";
 	String testOwner = "MOLGENIS";
@@ -32,6 +32,7 @@ public class dataTestMatrix {
 	Map<String, ArrayList<String>> dbTablesColumns = new HashMap<String, ArrayList<String>>();
 
 	public static Connection getConnection() throws Exception {
+		Locale.setDefault(Locale.US);
 		String driver = "oracle.jdbc.driver.OracleDriver";
 		String url = "jdbc:oracle:thin:@//localhost:2000/llptest";
 		String username = "molgenis";
@@ -42,7 +43,7 @@ public class dataTestMatrix {
 	}
 
 	public ResultSet executeQuery(String sql) throws Exception {
-		Connection conn = dataTestMatrix.getConnection();
+		Connection conn = DataTestMatrix.getConnection();
 		Statement stmt = conn.createStatement();
 		ResultSet rset = stmt.executeQuery(sql);
 		return rset;
@@ -84,17 +85,17 @@ public class dataTestMatrix {
 						dbTablesColumns.put(matrixColumnParts[0], dbColumns);
 					}
 				} else {
-					System.out.println("WARNING: '" + sourceTablePrefix
+					System.out.println("FAIL: '" + sourceTablePrefix
 							+ matrixColumnParts[0] + "." + matrixColumnParts[1]
 							+ "' (based on matrix column) not in source");
 					result = false;
 				}
 			} else {
 				System.out
-						.println("WARNING: '"
+						.println("WARNING OR POSSIBLE FAIL: '"
 								+ matrixColumn.getValue()
 								+ "' not conform format. (can not extract the source table and column name)");
-				result = false;
+				//result = false;
 			}
 		}
 		return result;
@@ -208,28 +209,15 @@ public class dataTestMatrix {
 		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
 				.entrySet()) {
 			for (String column : entry.getValue()) {
-				ResultSet rset = executeQuery("select count(*) from (select case  when substr("
-						+ column
-						+ ", length("
-						+ column
-						+ ")-1, 2) = '.0'  then substr("
-						+ column
-						+ ", 0, length("
-						+ column
-						+ ")-2) else "
-						+ column
-						+ " end as "
-						+ column
-						+ " from "
-						+ testTablePrefix
-						+ entry.getKey()
-						+ " minus select to_char("
-						+ column
-						+ ") from "
-						+ sourceOwner
-						+ "."
-						+ sourceTablePrefix
-						+ entry.getKey() + ")");
+				String sql = "select count(*) from (select case  when substr("
+						+ column + ", length(" + column
+						+ ")-1, 2) = '.0'  then substr(" + column
+						+ ", 0, length(" + column + ")-2) else " + column
+						+ " end as " + column + " from " + testTablePrefix
+						+ entry.getKey() + " minus select to_char(" + column
+						+ ") from " + sourceOwner + "." + sourceTablePrefix
+						+ entry.getKey() + ") ";
+				ResultSet rset = executeQuery(sql);
 				rset.next();
 				if (rset.getString(1).equals("0")) {
 					System.out.println("SUCCES " + entry.getKey() + "__"
@@ -245,37 +233,48 @@ public class dataTestMatrix {
 		return result;
 	}
 
-	@Test
-	public void init() throws Exception {
-		Locale.setDefault(Locale.US);
-		getMatrixColumnsIndex();
-		getDbTablesColumns();
-	}
+	public boolean compareFilteredTables(String w1Table, String w1Column,
+			String w1Operator, String w1Value, String w2Table, String w2Column,
+			String w2Operator, String w2Value) throws Exception {
+		boolean result = true;
+		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
+				.entrySet()) {
+			for (String column : entry.getValue()) {
+				String sql = "select count(*) from (select case  when substr("
+						+ column + ", length(" + column
+						+ ")-1, 2) = '.0'  then substr(" + column
+						+ ", 0, length(" + column + ")-2) else " + column
+						+ " end as " + column + " from " + testTablePrefix
+						+ entry.getKey() + " minus select to_char(" + column
+						+ ") from " + sourceOwner + "." + sourceTablePrefix
+						+ entry.getKey() + " ";
+				if (entry.getKey().equals(w1Table)
+						&& entry.getKey().equals(w2Table)) {
+					sql += "where " + w1Column + " " + w1Operator + " '"
+							+ w1Value + "' and " + w2Column + " " + w2Operator
+							+ " '" + w2Value + "' ";
+				} else if (entry.getKey().equals(w1Table)) {
+					sql += "where " + w1Column + " " + w1Operator + " '"
+							+ w1Value + "' ";
+				} else if (entry.getKey().equals(w2Table)) {
+					sql += "where " + w2Column + " " + w2Operator + " '"
+							+ w2Value + "' ";
+				}
+				sql += ")";
+				ResultSet rset = executeQuery(sql);
+				rset.next();
+				if (rset.getString(1).equals("0")) {
+					System.out.println("SUCCES " + entry.getKey() + "__"
+							+ column + " data in source (with '.0' fix)");
+				} else {
+					result = false;
+					System.out.println("FAILED datacompare for: "
+							+ entry.getKey() + "__" + column);
+				}
 
-	@Test(dependsOnMethods = { "init" })
-	public void testMakeGlobalTable() throws Exception {
-		makeGlobalTable();
-	}
-
-	@Test(dependsOnMethods = { "testMakeGlobalTable" })
-	public void testFillGlobalTable() throws Exception {
-		fillGlobalTable();
-	}
-
-	@Test(dependsOnMethods = { "testFillGlobalTable" })
-	public void testMakeTables() throws Exception {
-		makeTables();
-	}
-
-	@Test(dependsOnMethods = { "testMakeTables" })
-	public void testFillTables() throws Exception {
-		fillTables();
-	}
-
-	@Test(dependsOnMethods = { "testFillTables" })
-	public void testCompareTables() throws Exception {
-		if (compareTables() == false)
-			Assert.assertFalse(true);
+			}
+		}
+		return result;
 	}
 
 }
