@@ -201,10 +201,12 @@ public class DataTestMatrix {
 				else
 					combineTableColumn.add(entry.getKey() + "__" + column);
 			}
-			executeQuery("insert into " + testTablePrefix + entry.getKey()
+			String sql = "insert into " + testTablePrefix + entry.getKey()
 					+ " (" + Joiner.on(", ").join(entry.getValue())
 					+ ") select " + Joiner.on(", ").join(combineTableColumn)
-					+ " from " + testTablePrefix + "GLOBAL");
+					+ " from " + testTablePrefix + "GLOBAL group by "
+					+ Joiner.on(", ").join(combineTableColumn);
+			executeQuery(sql);
 		}
 	}
 
