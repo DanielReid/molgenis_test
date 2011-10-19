@@ -1,0 +1,236 @@
+package test.web;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import com.google.common.base.Joiner;
+
+public class DataTestMatrixEAV {
+	String file;
+	String investigation;
+
+	String testTablePrefix = "T2_";
+	String sourceTablePrefix = "LL_";
+	String matrixSeperator = "\t";
+	String testOwner = "MOLGENIS";
+
+	Map<Integer, String> matrixColumnsIndex = new LinkedHashMap<Integer, String>();
+	Map<Integer, String> matrixDbTablesIndex = new LinkedHashMap<Integer, String>();
+	Map<Integer, String> matrixDbColumnsIndex = new LinkedHashMap<Integer, String>();
+
+	public static Connection getConnection() throws Exception {
+		Locale.setDefault(Locale.US);
+		String driver = "oracle.jdbc.driver.OracleDriver";
+		String url = "jdbc:oracle:thin:@//localhost:2000/llptest";
+		String username = "molgenis";
+		String password = "molTagtGen24Ora";
+		Class.forName(driver);
+		Connection conn = DriverManager.getConnection(url, username, password);
+		return conn;
+	}
+
+	public ResultSet executeQuery(String sql) throws Exception {
+		Connection conn = DataTestMatrix.getConnection();
+		Statement stmt = conn.createStatement();
+		ResultSet rset = stmt.executeQuery(sql);
+		return rset;
+
+	}
+
+	public boolean tableExistsEAV(String table) throws Exception {
+		ResultSet rset = executeQuery("select count(*) from protocol where name = '"
+				+ sourceTablePrefix
+				+ table
+				+ "' and investigation = '"
+				+ investigation + "'");
+		rset.next();
+		if (rset.getString(1).equals("1"))
+			return true;
+		return false;
+	}
+
+	public boolean columnExistsEAV(String column) throws Exception {
+		ResultSet rset = executeQuery("select count(*) from observationelement where name = '"
+				+ column + "' and investigation = '" + investigation + "'");
+		rset.next();
+		if (rset.getString(1).equals("1"))
+			return true;
+		return false;
+	}
+
+	public boolean tableExists(String owner, String table) throws Exception {
+		ResultSet rset = executeQuery("select count(*) from dba_all_tables where owner='"
+				+ owner + "' and table_name='" + table + "'");
+		rset.next();
+		if (rset.getString(1).equals("1"))
+			return true;
+		return false;
+	}
+
+	public String getGlobalTablePaidColumnName() {
+		for (Map.Entry<Integer, String> matrixDbColumn : matrixDbColumnsIndex
+				.entrySet()) {
+			if (matrixDbColumn.getValue().equals("PA_ID"))
+				return "c" + matrixDbColumn.getKey();
+		}
+		return "";
+	}
+
+	public boolean parseMatrixColumns() throws Exception {
+		boolean result = true;
+		FileInputStream fstream = new FileInputStream(file);
+		DataInputStream in = new DataInputStream(fstream);
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String strLine = br.readLine();
+		String[] matrixColumns = strLine.split(matrixSeperator);
+		for (int i = 0; i < matrixColumns.length; i++) {
+			String[] matrixColumnParts = matrixColumns[i].split("__");
+			if (matrixColumnParts.length == 2) {
+				if (tableExistsEAV(matrixColumnParts[0])
+						&& columnExistsEAV(matrixColumnParts[1])) {
+					matrixColumnsIndex.put(i, matrixColumns[i]);
+					matrixDbTablesIndex.put(i, matrixColumnParts[0]);
+					matrixDbColumnsIndex.put(i, matrixColumnParts[1]);
+				} else {
+					System.out.println("FAIL: '" + matrixColumnParts[0] + "."
+							+ matrixColumnParts[1]
+							+ "' (based on matrix column) not in source");
+					result = false;
+				}
+			} else {
+				if (matrixColumnParts[0].equals("")
+						|| matrixColumnParts[0].equals("ROWNUMBER")) {
+				} else {
+					System.out
+							.println("FAIL: '"
+									+ matrixColumnParts[0]
+									+ "' not conform format. (can not extract the source table and column name)");
+					result = false;
+				}
+			}
+		}
+		in.close();
+		return result;
+	}
+
+	public void makeGlobalTable() throws Exception {
+		if (tableExists(testOwner, testTablePrefix + "GLOBAL"))
+			executeQuery("drop table " + testTablePrefix + "GLOBAL");
+		String sql = "create table "
+				+ testTablePrefix
+				+ "GLOBAL (c"
+				+ Joiner.on(" varchar(255), c").join(
+						matrixColumnsIndex.keySet()) + "  varchar(255))";
+		executeQuery(sql);
+	}
+
+	public void fillGlobalTable() throws Exception {
+		String sql;
+		String line;
+		String[] lineParts;
+		FileInputStream fstream = new FileInputStream(file);
+		DataInputStream in = new DataInputStream(fstream);
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		// Skip first line: column names.
+		br.readLine();
+		// Insert into column names.
+		sql = "insert into " + testTablePrefix + "GLOBAL (c"
+				+ Joiner.on(", c").join(matrixColumnsIndex.keySet()) + ")\n";
+		// First data line: SQL output contains: "select ".
+		if ((line = br.readLine()) != null) {
+			lineParts = line.split(matrixSeperator);
+			sql += "select ";
+			for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
+					.entrySet()) {
+				sql += "'" + lineParts[matrixColumn.getKey()] + "', ";
+			}
+			sql = sql.substring(0, sql.length()-2); // Remove the last ", "
+			sql += " from dual\n";
+		}
+		// Flowing data lines: SQL output contains: "union all select ".
+		while ((line = br.readLine()) != null) {
+			lineParts = line.split(matrixSeperator);
+			sql += "union all select ";
+			for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
+					.entrySet()) {
+				sql += "'" + lineParts[matrixColumn.getKey()] + "', ";
+			}
+			sql = sql.substring(0, sql.length()-2); // Remove the last ", "
+			sql += " from dual\n";
+		}
+		in.close();
+		executeQuery(sql);
+	}
+
+	public boolean compareGlobalTableToEAV() throws Exception {
+		String globalTablePaidColumnName = getGlobalTablePaidColumnName();
+		String sql = "";
+
+		// Query global table.
+		for (Map.Entry<Integer, String> matrixDbTable : matrixDbTablesIndex
+				.entrySet()) {
+			if (sql.length() != 0)
+				sql += "\nunion \n\n";
+			sql += "select \n";
+			sql += "  " + globalTablePaidColumnName + " pa_id \n";
+			sql += "  ,'" + sourceTablePrefix + matrixDbTable.getValue()
+					+ "' tab \n";
+			sql += "  ,'" + matrixDbColumnsIndex.get(matrixDbTable.getKey())
+					+ "' col \n";
+			sql += "  ,c" + matrixDbTable.getKey() + " value\n";
+			sql += "from \n";
+			sql += "  " + testTablePrefix + "global \n";
+		}
+
+		// Minus.
+		sql += "\nminus \n\n";
+
+		// Query EAV.
+		sql += "select \n";
+		sql += "  ( \n";
+		sql += "  select \n";
+		sql += "    value pa_id \n";
+		sql += "  from \n";
+		sql += "    observedvalue ov_1 \n";
+		sql += "  join observationelement oe_1 \n";
+		sql += "    on ov_1.feature = oe_1.id \n";
+		sql += "  where \n";
+		sql += "    ov_1.investigation = ov.investigation \n";
+		sql += "    and ov_1.protocolapplication = ov.protocolapplication \n";
+		sql += "    and oe_1.name = 'PA_ID' \n";
+		sql += "  ) pa_id \n";
+		sql += "  ,p.name tab \n";
+		sql += "  ,oe.name col \n";
+		sql += "  ,ov.value \n";
+		sql += "from \n";
+		sql += "  observedvalue ov \n";
+		sql += "join observationelement oe \n";
+		sql += "  on ov.feature = oe.id \n";
+		sql += "  and ov.investigation = '" + investigation + "' \n";
+		sql += "join protocolapplication pa \n";
+		sql += "  on ov.protocolapplication = pa.id \n";
+		sql += "join protocol p \n";
+		sql += "  on pa.protocol = p.id \n";
+
+		// Make a count.
+		sql = "select count(*) from (" + sql + ")";
+		System.out.println(sql);
+		ResultSet rset = executeQuery(sql);
+		System.out.println(rset);
+		rset.next();
+		System.out.println(rset.getString(1));
+		if (rset.getString(1).equals("0"))
+			return true;
+		return false;
+	}
+
+}
