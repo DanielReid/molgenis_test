@@ -15,8 +15,21 @@ import java.util.Map;
 import com.google.common.base.Joiner;
 
 public class DataTestMatrixEAV {
+
 	String file;
+
 	String investigation;
+	
+	String dbDriver = "oracle.jdbc.driver.OracleDriver";
+	String dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
+	String dbUsername = "molgenis";
+	String dbPassword = "molTagtGen24Ora";		
+
+	String testTablePrefix;
+	String sourceTablePrefix;
+	String matrixSeperator;
+	String testOwner;
+
 	boolean filter1 = false;
 	boolean filter2 = false;
 	String filter1Table = "";
@@ -28,38 +41,29 @@ public class DataTestMatrixEAV {
 	String filter2Operator = "";
 	String filter2Value = "";
 	String whereCondition = "";
-	String testTablePrefix = "T2_";
-	String sourceTablePrefix = "LL_";
-	String matrixSeperator = "\t";
-	String testOwner = "MOLGENIS";
+
+	Statement stmt;
+	ResultSet rset;
+
 	Map<Integer, String> matrixColumnsIndex = new LinkedHashMap<Integer, String>();
 	Map<Integer, String> matrixDbTablesIndex = new LinkedHashMap<Integer, String>();
 	Map<Integer, String> matrixDbColumnsIndex = new LinkedHashMap<Integer, String>();
 
-	public static Connection getConnection() throws Exception {
+	// init
+	public DataTestMatrixEAV() {
 		Locale.setDefault(Locale.US);
-		String driver = "oracle.jdbc.driver.OracleDriver";
-		String url = "jdbc:oracle:thin:@//localhost:2000/llptest";
-		String username = "molgenis";
-		String password = "molTagtGen24Ora";
-		Class.forName(driver);
-		Connection conn = DriverManager.getConnection(url, username, password);
-		return conn;
-	}
-
-	public ResultSet executeQuery(String sql) throws Exception {
-		Connection conn = DataTestMatrix.getConnection();
-		Statement stmt = conn.createStatement();
-		ResultSet rset = stmt.executeQuery(sql);
-		return rset;
-
+		try {
+			Class.forName(dbDriver);
+			Connection conn = DriverManager.getConnection(dbUrl, dbUsername,
+					dbPassword);
+			stmt = conn.createStatement();
+		} catch (Exception e) {
+		}
 	}
 
 	public boolean tableExistsEAV(String table) throws Exception {
-		ResultSet rset = executeQuery("select count(*) from protocol where name = '"
-				+ sourceTablePrefix
-				+ table
-				+ "' and investigation = '"
+		rset = stmt.executeQuery("select count(*) from protocol where name = '"
+				+ sourceTablePrefix + table + "' and investigation = '"
 				+ investigation + "'");
 		rset.next();
 		if (rset.getString(1).equals("1"))
@@ -68,8 +72,12 @@ public class DataTestMatrixEAV {
 	}
 
 	public boolean columnExistsEAV(String column) throws Exception {
-		ResultSet rset = executeQuery("select count(*) from observationelement where name = '"
-				+ column + "' and investigation = '" + investigation + "'");
+		rset = stmt
+				.executeQuery("select count(*) from observationelement where name = '"
+						+ column
+						+ "' and investigation = '"
+						+ investigation
+						+ "'");
 		rset.next();
 		if (rset.getString(1).equals("1"))
 			return true;
@@ -77,8 +85,9 @@ public class DataTestMatrixEAV {
 	}
 
 	public boolean tableExists(String owner, String table) throws Exception {
-		ResultSet rset = executeQuery("select count(*) from dba_all_tables where owner='"
-				+ owner + "' and table_name='" + table + "'");
+		rset = stmt
+				.executeQuery("select count(*) from dba_all_tables where owner='"
+						+ owner + "' and table_name='" + table + "'");
 		rset.next();
 		if (rset.getString(1).equals("1"))
 			return true;
@@ -135,13 +144,12 @@ public class DataTestMatrixEAV {
 
 	public void makeGlobalTable() throws Exception {
 		if (tableExists(testOwner, testTablePrefix + "GLOBAL"))
-			executeQuery("drop table " + testTablePrefix + "GLOBAL");
-		String sql = "create table "
+			stmt.execute("drop table " + testTablePrefix + "GLOBAL");
+		stmt.execute("create table "
 				+ testTablePrefix
 				+ "GLOBAL (c"
 				+ Joiner.on(" varchar(255), c").join(
-						matrixColumnsIndex.keySet()) + "  varchar(255))";
-		executeQuery(sql);
+						matrixColumnsIndex.keySet()) + "  varchar(255))");
 	}
 
 	public void fillGlobalTable() throws Exception {
@@ -186,17 +194,16 @@ public class DataTestMatrixEAV {
 			counterTotal++;
 			// Prevent performance decrease (and provide feedback).
 			if (counter >= 1000) {
-				executeQuery(sqlHead + sqlBody);
+				stmt.execute(sqlHead + sqlBody);
 				System.out.println(counterTotal + " rows inserted...");
 				sqlBody = "";
 				counter = 0;
 			}
 		}
-		if (sqlBody.length() != 0)
-		{
-			executeQuery(sqlHead + sqlBody);
+		if (sqlBody.length() != 0) {
+			stmt.execute(sqlHead + sqlBody);
 			System.out.println(counterTotal + " rows inserted...");
-		}		
+		}
 		System.out.println("Insertation done...");
 		in.close();
 	}
@@ -262,18 +269,18 @@ public class DataTestMatrixEAV {
 					+ "' and oe.name = '" + filter2Column + "' and ov.value "
 					+ filter2Operator + " '" + filter2Value + "')";
 		}
-		System.out.println(sql);
-
 		// Make a count.
 		String sqlCount = "select count(*) from (" + sql + ")";
-		ResultSet rset = executeQuery(sqlCount);
+		rset = stmt.executeQuery(sqlCount);
 		rset.next();
 		if (rset.getString(1).equals("0"))
 			return true;
-		System.out.println("FAIL: Row count NOT maching values = "
-				+ rset.getString(1));
+		System.out.println("FAIL: Values do not match");
+		System.out.println("Rowcount = " + rset.getString(1));
 		System.out.println("The used query is: ");
+		System.out.println("--------------------BEGIN--------------------");
 		System.out.println(sql);
+		System.out.println("---------------------END---------------------");
 		return false;
 	}
 
