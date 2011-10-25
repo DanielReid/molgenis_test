@@ -17,12 +17,21 @@ import com.google.common.base.Joiner;
 public class DataTestMatrixEAV {
 	String file;
 	String investigation;
-
+	boolean filter1 = false;
+	boolean filter2 = false;
+	String filter1Table = "";
+	String filter1Column = "";
+	String filter1Operator = "";
+	String filter1Value = "";
+	String filter2Table = "";
+	String filter2Column = "";
+	String filter2Operator = "";
+	String filter2Value = "";
+	String whereCondition = "";
 	String testTablePrefix = "T2_";
 	String sourceTablePrefix = "LL_";
 	String matrixSeperator = "\t";
 	String testOwner = "MOLGENIS";
-
 	Map<Integer, String> matrixColumnsIndex = new LinkedHashMap<Integer, String>();
 	Map<Integer, String> matrixDbTablesIndex = new LinkedHashMap<Integer, String>();
 	Map<Integer, String> matrixDbColumnsIndex = new LinkedHashMap<Integer, String>();
@@ -86,6 +95,7 @@ public class DataTestMatrixEAV {
 	}
 
 	public boolean parseMatrixColumns() throws Exception {
+		System.out.println("Start parsing and lookup Matrix colums...");
 		boolean result = true;
 		FileInputStream fstream = new FileInputStream(file);
 		DataInputStream in = new DataInputStream(fstream);
@@ -119,6 +129,7 @@ public class DataTestMatrixEAV {
 			}
 		}
 		in.close();
+		System.out.println("Parsing and lookup Matrix colums done...");
 		return result;
 	}
 
@@ -134,7 +145,11 @@ public class DataTestMatrixEAV {
 	}
 
 	public void fillGlobalTable() throws Exception {
-		String sql;
+		System.out.println("Start insertation...");
+		String sqlHead = "";
+		String sqlBody = "";
+		Integer counter = 0;
+		Integer counterTotal = 0;
 		String line;
 		String[] lineParts;
 		FileInputStream fstream = new FileInputStream(file);
@@ -142,39 +157,54 @@ public class DataTestMatrixEAV {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		// Skip first line: column names.
 		br.readLine();
-		// Insert into column names.
-		sql = "insert into " + testTablePrefix + "GLOBAL (c"
-				+ Joiner.on(", c").join(matrixColumnsIndex.keySet()) + ")\n";
 		// First data line: SQL output contains: "select ".
+		sqlHead += "insert into " + testTablePrefix + "GLOBAL (c"
+				+ Joiner.on(", c").join(matrixColumnsIndex.keySet()) + ")\n";
 		if ((line = br.readLine()) != null) {
 			lineParts = line.split(matrixSeperator);
-			sql += "select ";
+			sqlHead += "select ";
 			for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
 					.entrySet()) {
-				sql += "'" + lineParts[matrixColumn.getKey()] + "', ";
+				sqlHead += "'" + lineParts[matrixColumn.getKey()] + "', ";
 			}
-			sql = sql.substring(0, sql.length()-2); // Remove the last ", "
-			sql += " from dual\n";
+			sqlHead = sqlHead.substring(0, sqlHead.length() - 2); // Remove the
+																	// last ", "
+			sqlHead += " from dual\n";
 		}
 		// Flowing data lines: SQL output contains: "union all select ".
 		while ((line = br.readLine()) != null) {
 			lineParts = line.split(matrixSeperator);
-			sql += "union all select ";
+			sqlBody += "union all select ";
 			for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
 					.entrySet()) {
-				sql += "'" + lineParts[matrixColumn.getKey()] + "', ";
+				sqlBody += "'" + lineParts[matrixColumn.getKey()] + "', ";
 			}
-			sql = sql.substring(0, sql.length()-2); // Remove the last ", "
-			sql += " from dual\n";
+			// Remove the last ", "
+			sqlBody = sqlBody.substring(0, sqlBody.length() - 2);
+			sqlBody += " from dual\n";
+			counter++;
+			counterTotal++;
+			// Prevent performance decrease (and provide feedback).
+			if (counter >= 1000) {
+				executeQuery(sqlHead + sqlBody);
+				System.out.println(counterTotal + " rows inserted...");
+				sqlBody = "";
+				counter = 0;
+			}
 		}
+		if (sqlBody.length() != 0)
+		{
+			executeQuery(sqlHead + sqlBody);
+			System.out.println(counterTotal + " rows inserted...");
+		}		
+		System.out.println("Insertation done...");
 		in.close();
-		executeQuery(sql);
 	}
 
 	public boolean compareGlobalTableToEAV() throws Exception {
+		System.out.println("Starting compare please wait...");
 		String globalTablePaidColumnName = getGlobalTablePaidColumnName();
 		String sql = "";
-
 		// Query global table.
 		for (Map.Entry<Integer, String> matrixDbTable : matrixDbTablesIndex
 				.entrySet()) {
@@ -221,15 +251,29 @@ public class DataTestMatrixEAV {
 		sql += "join protocol p \n";
 		sql += "  on pa.protocol = p.id \n";
 
-		// Make a count.
-		sql = "select count(*) from (" + sql + ")";
+		if (filter1 == true) {
+			sql += "where (p.name = '" + sourceTablePrefix + filter1Table
+					+ "' and oe.name = '" + filter1Column + "' and ov.value "
+					+ filter1Operator + " '" + filter1Value + "')";
+		}
+
+		if (filter1 == true && filter2 == true) {
+			sql += "or (p.name = '" + sourceTablePrefix + filter2Table
+					+ "' and oe.name = '" + filter2Column + "' and ov.value "
+					+ filter2Operator + " '" + filter2Value + "')";
+		}
 		System.out.println(sql);
-		ResultSet rset = executeQuery(sql);
-		System.out.println(rset);
+
+		// Make a count.
+		String sqlCount = "select count(*) from (" + sql + ")";
+		ResultSet rset = executeQuery(sqlCount);
 		rset.next();
-		System.out.println(rset.getString(1));
 		if (rset.getString(1).equals("0"))
 			return true;
+		System.out.println("FAIL: Row count NOT maching values = "
+				+ rset.getString(1));
+		System.out.println("The used query is: ");
+		System.out.println(sql);
 		return false;
 	}
 
