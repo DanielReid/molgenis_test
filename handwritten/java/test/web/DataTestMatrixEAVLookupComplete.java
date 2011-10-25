@@ -34,8 +34,8 @@ public class DataTestMatrixEAVLookupComplete {
 	
 	@Test(dependsOnMethods = { "testFillGlobalTable" })
 	public void testCompareGlobalTableToEAV() throws Exception {
-		//if (DataTestMatrixEAV.compareGlobalTableToEAV() == false)
-			//Assert.assertFalse(true);
+		if (DataTestMatrixEAV.compareGlobalTableToEAV() == false)
+			Assert.assertFalse(true);
 	}
 	
 }
