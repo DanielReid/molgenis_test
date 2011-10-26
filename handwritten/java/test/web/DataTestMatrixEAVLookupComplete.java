@@ -18,17 +18,26 @@ public class DataTestMatrixEAVLookupComplete {
 		DataTestMatrixEAV.matrixSeperator = "\t";
 		DataTestMatrixEAV.testOwner = "MOLGENIS";
 		
+		DataTestMatrixEAV.dbDriver = "oracle.jdbc.driver.OracleDriver";
+		DataTestMatrixEAV.dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
+		DataTestMatrixEAV.dbUsername = "molgenis";
+		DataTestMatrixEAV.dbPassword = "molTagtGen24Ora";
+		
+		DataTestMatrixEAV.init();
+		
 		if (DataTestMatrixEAV.parseMatrixColumns() == false)
 			Assert.assertFalse(true);
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	public void testMakeGlobalTable() throws Exception {
-		DataTestMatrixEAV.makeGlobalTable();
+	public void testparseMatrixColumns() throws Exception {
+		if (DataTestMatrixEAV.parseMatrixColumns() == false)
+			Assert.assertFalse(true);		
 	}
 
-	@Test(dependsOnMethods = { "testMakeGlobalTable" })
+	@Test(dependsOnMethods = { "testparseMatrixColumns" })
 	public void testFillGlobalTable() throws Exception {
+		DataTestMatrixEAV.makeGlobalTable();
 		DataTestMatrixEAV.fillGlobalTable();
 	}
 	

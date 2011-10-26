@@ -19,28 +19,19 @@ public class DataTestMatrixEAV {
 	String file;
 
 	String investigation;
-	
-	String dbDriver = "oracle.jdbc.driver.OracleDriver";
-	String dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
-	String dbUsername = "molgenis";
-	String dbPassword = "molTagtGen24Ora";		
+
+	String dbDriver;
+	String dbUrl;
+	String dbUsername;
+	String dbPassword;
 
 	String testTablePrefix;
 	String sourceTablePrefix;
 	String matrixSeperator;
 	String testOwner;
 
-	boolean filter1 = false;
-	boolean filter2 = false;
-	String filter1Table = "";
-	String filter1Column = "";
-	String filter1Operator = "";
-	String filter1Value = "";
-	String filter2Table = "";
-	String filter2Column = "";
-	String filter2Operator = "";
-	String filter2Value = "";
-	String whereCondition = "";
+	String caseWhenCondition = "";
+	String caseWhenEndAs = "";
 
 	Statement stmt;
 	ResultSet rset;
@@ -49,8 +40,7 @@ public class DataTestMatrixEAV {
 	Map<Integer, String> matrixDbTablesIndex = new LinkedHashMap<Integer, String>();
 	Map<Integer, String> matrixDbColumnsIndex = new LinkedHashMap<Integer, String>();
 
-	// init
-	public DataTestMatrixEAV() {
+	public void init() {
 		Locale.setDefault(Locale.US);
 		try {
 			Class.forName(dbDriver);
@@ -232,7 +222,7 @@ public class DataTestMatrixEAV {
 		sql += "\nminus \n\n";
 
 		// Query EAV.
-		sql += "select \n";
+		sql += "select " + caseWhenCondition + " \n";
 		sql += "  ( \n";
 		sql += "  select \n";
 		sql += "    value pa_id \n";
@@ -244,10 +234,10 @@ public class DataTestMatrixEAV {
 		sql += "    ov_1.investigation = ov.investigation \n";
 		sql += "    and ov_1.protocolapplication = ov.protocolapplication \n";
 		sql += "    and oe_1.name = 'PA_ID' \n";
-		sql += "  ) pa_id \n";
-		sql += "  ,p.name tab \n";
-		sql += "  ,oe.name col \n";
-		sql += "  ,ov.value \n";
+		sql += "  ) " + caseWhenEndAs + " pa_id \n";
+		sql += "  ," + caseWhenCondition + " p.name " + caseWhenEndAs + " tab \n";
+		sql += "  ," + caseWhenCondition + " oe.name " + caseWhenEndAs + " col \n";
+		sql += "  ," + caseWhenCondition + " ov.value " + caseWhenEndAs + " value \n";
 		sql += "from \n";
 		sql += "  observedvalue ov \n";
 		sql += "join observationelement oe \n";
@@ -258,17 +248,6 @@ public class DataTestMatrixEAV {
 		sql += "join protocol p \n";
 		sql += "  on pa.protocol = p.id \n";
 
-		if (filter1 == true) {
-			sql += "where (p.name = '" + sourceTablePrefix + filter1Table
-					+ "' and oe.name = '" + filter1Column + "' and ov.value "
-					+ filter1Operator + " '" + filter1Value + "')";
-		}
-
-		if (filter1 == true && filter2 == true) {
-			sql += "or (p.name = '" + sourceTablePrefix + filter2Table
-					+ "' and oe.name = '" + filter2Column + "' and ov.value "
-					+ filter2Operator + " '" + filter2Value + "')";
-		}
 		// Make a count.
 		String sqlCount = "select count(*) from (" + sql + ")";
 		rset = stmt.executeQuery(sqlCount);
