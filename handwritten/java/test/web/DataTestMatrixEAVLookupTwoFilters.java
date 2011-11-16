@@ -42,9 +42,6 @@ public class DataTestMatrixEAVLookupTwoFilters {
 				+ filter2Operator + " '" + filter2Value + "') then null else ";
 
 		DataTestMatrixEAV.init();
-
-		if (DataTestMatrixEAV.parseMatrixColumns() == false)
-			Assert.assertFalse(true);
 	}
 
 	@Test(dependsOnMethods = { "init" })

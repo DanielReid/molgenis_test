@@ -48,6 +48,7 @@ public class DataTestMatrixEAV {
 					dbPassword);
 			stmt = conn.createStatement();
 		} catch (Exception e) {
+			System.out.println(e);
 		}
 	}
 
@@ -247,6 +248,7 @@ public class DataTestMatrixEAV {
 		sql += "  on ov.protocolapplication = pa.id \n";
 		sql += "join protocol p \n";
 		sql += "  on pa.protocol = p.id \n";
+		//System.out.println(sql);
 
 		// Make a count.
 		String sqlCount = "select count(*) from (" + sql + ")";
