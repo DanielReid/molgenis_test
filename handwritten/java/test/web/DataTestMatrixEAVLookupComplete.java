@@ -24,9 +24,6 @@ public class DataTestMatrixEAVLookupComplete {
 		DataTestMatrixEAV.dbPassword = "molTagtGen24Ora";
 		
 		DataTestMatrixEAV.init();
-		
-		if (DataTestMatrixEAV.parseMatrixColumns() == false)
-			Assert.assertFalse(true);
 	}
 
 	@Test(dependsOnMethods = { "init" })
