@@ -8,34 +8,30 @@ public class DataTestMatrixLookupTwoFilters {
 
 	@Test
 	public void init() throws Exception {
-		// TODO: Make Selenium download te Molgenis Matrix export file
-		DataTestMatrix.file = "/pheno_two_filters.txt";
+		DataTestMatrix.dbDriver = "oracle.jdbc.driver.OracleDriver";
+		DataTestMatrix.dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
+		DataTestMatrix.dbUsername = "molgenis";
+		DataTestMatrix.dbPassword = "molTagtGen24Ora";
+		DataTestMatrix.file = "/pheno_complete.txt";
+		DataTestMatrix.testTablePrefix = "T2_";
+		DataTestMatrix.testOwner = "MOLGENIS";
+		DataTestMatrix.sourceTablePrefix = "LL_";
+		DataTestMatrix.sourceOwner = "LLPOPER";
+		DataTestMatrix.matrixSeperator = "\t";
+
+		DataTestMatrix.init();
 		DataTestMatrix.getMatrixColumnsIndex();
-		if (DataTestMatrix.getDbTablesColumns() == false)
+		if (DataTestMatrix.getPA_ID())
 			Assert.assertFalse(true);
-	}
-
-	@Test(dependsOnMethods = { "init" })
-	public void testMakeGlobalTable() throws Exception {
+		if (DataTestMatrix.getPublishTablesColumns())
+			Assert.assertFalse(true);
 		DataTestMatrix.makeGlobalTable();
-	}
-
-	@Test(dependsOnMethods = { "testMakeGlobalTable" })
-	public void testFillGlobalTable() throws Exception {
 		DataTestMatrix.fillGlobalTable();
-	}
-
-	@Test(dependsOnMethods = { "testFillGlobalTable" })
-	public void testMakeTables() throws Exception {
 		DataTestMatrix.makeTables();
-	}
-
-	@Test(dependsOnMethods = { "testMakeTables" })
-	public void testFillTables() throws Exception {
 		DataTestMatrix.fillTables();
 	}
 
-	@Test(dependsOnMethods = { "testFillTables" })
+	@Test(dependsOnMethods = { "init" })
 	public void testCompareTablesTwoFilters() throws Exception {
 		if (DataTestMatrix.compareFilteredTables("BEZOEK1", "GEWICHT", "=",
 				"50", "PATIENT", "GESLACHT", "=", "2") == false)
