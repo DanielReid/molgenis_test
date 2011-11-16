@@ -16,41 +16,36 @@ import java.util.Map;
 import com.google.common.base.Joiner;
 
 public class DataTestMatrix {
+	String dbDriver;
+	String dbUrl;
+	String dbUsername;
+	String dbPassword;
 	String file;
-
-	String testTablePrefix = "T2_";
-	String testOwner = "MOLGENIS";
-
-	String sourceTablePrefix = "LL_";
-	String sourceOwner = "LLPOPER";
-
-	String paidMatrixColumnName = "PATIENT__PA_ID";
-	String matrixSeperator = "\t";
-
-	String[] paidMatrixColumnNameParts = paidMatrixColumnName.split("__");
+	String testTablePrefix;
+	String testOwner;
+	String sourceTablePrefix;
+	String sourceOwner;
+	String matrixSeperator;
+	Statement stmt;
+	ResultSet rset;
+	String[] paidMatrixColumnNameParts;
 	Map<Integer, String> matrixColumnsIndex = new HashMap<Integer, String>();
-	Map<String, ArrayList<String>> dbTablesColumns = new HashMap<String, ArrayList<String>>();
+	Map<String, ArrayList<String>> publishTablesColumns = new HashMap<String, ArrayList<String>>();
 
-	public static Connection getConnection() throws Exception {
+	public void init() {
 		Locale.setDefault(Locale.US);
-		String driver = "oracle.jdbc.driver.OracleDriver";
-		String url = "jdbc:oracle:thin:@//localhost:2000/llptest";
-		String username = "molgenis";
-		String password = "molTagtGen24Ora";
-		Class.forName(driver);
-		Connection conn = DriverManager.getConnection(url, username, password);
-		return conn;
-	}
-
-	public ResultSet executeQuery(String sql) throws Exception {
-		Connection conn = DataTestMatrix.getConnection();
-		Statement stmt = conn.createStatement();
-		ResultSet rset = stmt.executeQuery(sql);
-		return rset;
-
+		try {
+			Class.forName(dbDriver);
+			Connection conn = DriverManager.getConnection(dbUrl, dbUsername,
+					dbPassword);
+			stmt = conn.createStatement();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 
 	public void getMatrixColumnsIndex() throws Exception {
+		System.out.println("Getting Matrix column index...");
 		FileInputStream fstream = new FileInputStream(file);
 		DataInputStream in = new DataInputStream(fstream);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -63,32 +58,49 @@ public class DataTestMatrix {
 		in.close();
 	}
 
-	public boolean getDbTablesColumns() throws Exception {
-		boolean result = true;
+	public Boolean getPA_ID() {
+		for (String column : matrixColumnsIndex.values()) {
+			if (column.contains("PA_ID")) {
+				paidMatrixColumnNameParts = column.split("__");
+				if (paidMatrixColumnNameParts.length == 2) {
+					return false;
+				}
+			}
+		}
+		System.out.println("FAIL: No PA_ID found");
+		return true;
+	}
+
+	public boolean getPublishTablesColumns() throws Exception {
+		System.out.println("Generating Publish table column structure...");
+		boolean fail = false;
 		for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
 				.entrySet()) {
 			String[] matrixColumnParts = matrixColumn.getValue().split("__");
 			if (matrixColumnParts.length == 2) {
 				if (tableColumnExists(sourceOwner, sourceTablePrefix
 						+ matrixColumnParts[0], matrixColumnParts[1])) {
-					if (dbTablesColumns.get(matrixColumnParts[0]) == null) {
+					if (publishTablesColumns.get(matrixColumnParts[0]) == null) {
 						ArrayList<String> dbColumns = new ArrayList<String>();
 						// for every table add "PA_ID"
 						dbColumns.add(paidMatrixColumnNameParts[1]);
 						dbColumns.add(matrixColumnParts[1]);
-						dbTablesColumns.put(matrixColumnParts[0], dbColumns);
+						publishTablesColumns.put(matrixColumnParts[0],
+								dbColumns);
 					} else {
 						ArrayList<String> dbColumns = new ArrayList<String>();
-						dbColumns = dbTablesColumns.get(matrixColumnParts[0]);
+						dbColumns = publishTablesColumns
+								.get(matrixColumnParts[0]);
 						if (dbColumns.contains(matrixColumnParts[1]) == false)
 							dbColumns.add(matrixColumnParts[1]);
-						dbTablesColumns.put(matrixColumnParts[0], dbColumns);
+						publishTablesColumns.put(matrixColumnParts[0],
+								dbColumns);
 					}
 				} else {
 					System.out.println("FAIL: '" + sourceTablePrefix
 							+ matrixColumnParts[0] + "." + matrixColumnParts[1]
 							+ "' (based on matrix column) not in source");
-					result = false;
+					fail = true;
 				}
 			} else {
 				if (matrixColumn.getValue().equals("")
@@ -98,28 +110,17 @@ public class DataTestMatrix {
 							.println("FAIL: '"
 									+ matrixColumn.getValue()
 									+ "' not conform format. (can not extract the source table and column name)");
-					result = false;
+					fail = true;
 				}
 			}
 		}
-		return result;
-	}
-
-	public void makeTables() throws Exception {
-		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
-				.entrySet()) {
-			if (tableExists(testOwner, testTablePrefix + entry.getKey()))
-				executeQuery("drop table " + testTablePrefix + entry.getKey());
-			executeQuery("create table " + testTablePrefix + entry.getKey()
-					+ " ("
-					+ Joiner.on(" varchar(255), ").join(entry.getValue())
-					+ "  varchar(255))");
-		}
+		return fail;
 	}
 
 	boolean tableExists(String owner, String table) throws Exception {
-		ResultSet rset = executeQuery("select count(*) from dba_all_tables where owner='"
-				+ owner + "' and table_name='" + table + "'");
+		rset = stmt
+				.executeQuery("select count(*) from dba_all_tables where owner='"
+						+ owner + "' and table_name='" + table + "'");
 		rset.next();
 		if (rset.getString(1).equals("1"))
 			return true;
@@ -128,11 +129,12 @@ public class DataTestMatrix {
 
 	boolean tableColumnExists(String owner, String table, String column)
 			throws Exception {
-		ResultSet rset = executeQuery("select count(*) from dba_tab_columns where owner='"
-				+ owner
-				+ "' and table_name='"
-				+ table
-				+ "' and column_name = '" + column + "'");
+		rset = stmt
+				.executeQuery("select count(*) from dba_tab_columns where owner='"
+						+ owner
+						+ "' and table_name='"
+						+ table
+						+ "' and column_name = '" + column + "'");
 		rset.next();
 		if (rset.getString(1).equals("1"))
 			return true;
@@ -140,9 +142,10 @@ public class DataTestMatrix {
 	}
 
 	public void makeGlobalTable() throws Exception {
+		System.out.println("Making global table...");
 		if (tableExists(testOwner, testTablePrefix + "GLOBAL"))
-			executeQuery("drop table " + testTablePrefix + "GLOBAL");
-		executeQuery("create table "
+			stmt.executeQuery("drop table " + testTablePrefix + "GLOBAL");
+		stmt.executeQuery("create table "
 				+ testTablePrefix
 				+ "GLOBAL"
 				+ " ("
@@ -151,6 +154,7 @@ public class DataTestMatrix {
 	}
 
 	public void fillGlobalTable() throws Exception {
+		System.out.println("Filling global table...");
 		String sql;
 		String line;
 		String[] lineParts;
@@ -186,12 +190,27 @@ public class DataTestMatrix {
 					+ " from dual\n";
 		}
 		in.close();
-		executeQuery(sql);
+		stmt.executeQuery(sql);
+	}
+
+	public void makeTables() throws Exception {
+		System.out.println("Make tables...");
+		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
+				.entrySet()) {
+			if (tableExists(testOwner, testTablePrefix + entry.getKey()))
+				stmt.executeQuery("drop table " + testTablePrefix
+						+ entry.getKey());
+			stmt.executeQuery("create table " + testTablePrefix
+					+ entry.getKey() + " ("
+					+ Joiner.on(" varchar(255), ").join(entry.getValue())
+					+ "  varchar(255))");
+		}
 	}
 
 	public void fillTables() throws Exception {
+		System.out.println("Filling tables...");
 		ArrayList<String> combineTableColumn = new ArrayList<String>();
-		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
+		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
 				.entrySet()) {
 			combineTableColumn.clear();
 			for (String column : entry.getValue()) {
@@ -206,14 +225,15 @@ public class DataTestMatrix {
 					+ ") select " + Joiner.on(", ").join(combineTableColumn)
 					+ " from " + testTablePrefix + "GLOBAL group by "
 					+ Joiner.on(", ").join(combineTableColumn);
-			executeQuery(sql);
+			System.out.println(sql);
 		}
 	}
 
 	public boolean compareTables() throws Exception {
 		boolean result = true;
-		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
+		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
 				.entrySet()) {
+			System.out.println("Comparing " + entry.getKey() + "...");
 			for (String column : entry.getValue()) {
 				String sql = "select count(*) from (select case  when substr("
 						+ column + ", length(" + column
@@ -223,7 +243,7 @@ public class DataTestMatrix {
 						+ entry.getKey() + " minus select to_char(" + column
 						+ ") from " + sourceOwner + "." + sourceTablePrefix
 						+ entry.getKey() + ") ";
-				ResultSet rset = executeQuery(sql);
+				rset = stmt.executeQuery(sql);
 				rset.next();
 				if (rset.getString(1).equals("0")) {
 					System.out.println("SUCCES " + entry.getKey() + "__"
@@ -243,8 +263,9 @@ public class DataTestMatrix {
 			String w1Operator, String w1Value, String w2Table, String w2Column,
 			String w2Operator, String w2Value) throws Exception {
 		boolean result = true;
-		for (Map.Entry<String, ArrayList<String>> entry : dbTablesColumns
+		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
 				.entrySet()) {
+			System.out.println("Comparing " + entry.getKey() + "...");
 			for (String column : entry.getValue()) {
 				String sql = "select count(*) from (select case  when substr("
 						+ column + ", length(" + column
@@ -267,7 +288,7 @@ public class DataTestMatrix {
 							+ w2Value + "' ";
 				}
 				sql += ")";
-				ResultSet rset = executeQuery(sql);
+				rset = stmt.executeQuery(sql);
 				rset.next();
 				if (rset.getString(1).equals("0")) {
 					System.out.println("SUCCES " + entry.getKey() + "__"
