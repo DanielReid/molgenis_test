@@ -17,35 +17,44 @@ public class DataTestPublishStageLookup {
 		DataTestPublishStage.dbPassword1 = "molTagtGen24Ora";
 
 		DataTestPublishStage.dbDriver2 = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		DataTestPublishStage.dbUrl2 = "jdbc:sqlserver://ANCO-PC;databaseName=stage";
+		DataTestPublishStage.dbUrl2 = "jdbc:sqlserver://W3ZKHAS323;databaseName=LLCDR_Stage;integratedSecurity=true";
 		DataTestPublishStage.dbUsername2 = "sa";
 		DataTestPublishStage.dbPassword2 = "123456";
 
 		DataTestPublishStage.publishOwnerPrefix = "LLPOPER.";
-		DataTestPublishStage.stageOwnerPrefix = "";
-		
-		DataTestPublishStage.excludedTables = new String[] { "LL_DERIVED_VALUES" };
+		DataTestPublishStage.tableNameReplaceFrom = "LL_";
+		DataTestPublishStage.tableNameReplaceTo = "";
+
+		// DEFAULTS:
+		/*
+		 * DataTestPublishStage.excludedTables = new String[] {
+		 * "LL_DERIVED_VALUES" }; DataTestPublishStage.excludedColumns = new
+		 * String[] { "STID", "PA_ID" };
+		 */
+
+		DataTestPublishStage.excludedTables = new String[] {
+				"LL_DERIVED_VALUES", "LL_UVFAM" };
 		DataTestPublishStage.excludedColumns = new String[] { "STID", "PA_ID",
-				"ID", "DATUM" };
+				"GEBJAAR", "GEMEENTENAAM", "ID", "OVLJAAR", "PARTICIPST",
+				"UITSLOPM", "DATUM", "RACE", "RACE_TXT", "DATUM", "MEETSTAND",
+				"HR", "P", "PQ", "P_AXIS", "QRS", "QRS_AXIS", "QT", "QTC",
+				"T_AXIS" };
 
 		DataTestPublishStage.init();
 		DataTestPublishStage.getPublishTablesColumns();
+		DataTestPublishStage.getTotalRecordCount();
 	}
-	
+
 	@Test(dependsOnMethods = { "init" })
 	public void testCompareTableColums() throws Exception {
 		if (DataTestPublishStage.compareTableColums())
-			Assert.assertFalse(true);		
+			Assert.assertFalse(true);
 	}
 
 	@Test(dependsOnMethods = { "testCompareTableColums" })
 	public void testCompareData() throws Exception {
 		if (DataTestPublishStage.compareData())
-			Assert.assertFalse(true);				
+			Assert.assertFalse(true);
 	}
-	
-
-	
-	
 
 }
