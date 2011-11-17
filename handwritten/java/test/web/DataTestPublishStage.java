@@ -3,7 +3,6 @@ package test.web;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,8 @@ public class DataTestPublishStage {
 	String dbPassword2;
 
 	String publishOwnerPrefix;
-	String stageOwnerPrefix;
+	String tableNameReplaceFrom;
+	String tableNameReplaceTo;
 
 	String[] excludedTables;
 	String[] excludedColumns;
@@ -36,6 +36,7 @@ public class DataTestPublishStage {
 	ResultSet rset2;
 
 	Integer stid;
+	Integer totalRecordCount = 0;
 
 	Map<String, ArrayList<String>> publishTablesColumns = new HashMap<String, ArrayList<String>>();
 
@@ -60,6 +61,8 @@ public class DataTestPublishStage {
 	}
 
 	public void getPublishTablesColumns() throws Exception {
+		System.out
+				.println("Getting all the related tables form publ_dict_studie...");
 		String sql = "";
 		sql += "select\n";
 		sql += "  s.stid, pds.tabnaam, pds.veld\n";
@@ -93,11 +96,27 @@ public class DataTestPublishStage {
 						dbColumns.add(rset1.getString(3));
 					publishTablesColumns.put(rset1.getString(2), dbColumns);
 				}
+			} else {
+				System.out
+						.println("\tWARINING: ignoring table: "
+								+ rset1.getString(2) + " column: "
+								+ rset1.getString(3));
 			}
+		}
+	}
+	
+	public void getTotalRecordCount() throws Exception{
+		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
+				.entrySet()) {
+			rset1 = stmt1.executeQuery("select count(*) from " + publishOwnerPrefix + tabCols.getKey());
+			rset1.next();
+			totalRecordCount += Integer.parseInt(rset1.getString(1));
 		}
 	}
 
 	public Boolean compareTableColums() throws Exception {
+		System.out
+				.println("Starting table and column lookup in the Stage database...");
 		Boolean fail = false;
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
@@ -108,12 +127,18 @@ public class DataTestPublishStage {
 				sql += "from \n";
 				sql += "  INFORMATION_SCHEMA.COLUMNS \n";
 				sql += "where \n";
-				sql += "  TABLE_NAME = '" + tabCols.getKey() + "' \n";
+				sql += "  TABLE_NAME = '"
+						+ tabCols.getKey().replace(tableNameReplaceFrom,
+								tableNameReplaceTo) + "' \n";
 				sql += "  and COLUMN_NAME = '" + col + "' \n";
 				rset2 = stmt2.executeQuery(sql);
 				rset2.next();
-				if (!rset2.getString(1).equals("1")) {
-					System.out.println(tabCols.getKey() + " " + col);
+				if (Integer.parseInt(rset2.getString(1)) == 1) {
+					System.out.println("\tFound table: " + tabCols.getKey()
+							+ " column: " + col);
+				} else {
+					System.out.println("\tFAILED: Not found table: "
+							+ tabCols.getKey() + " column: " + col);
 					fail = true;
 				}
 			}
@@ -127,6 +152,7 @@ public class DataTestPublishStage {
 		Integer counterTotal = 0;
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
+			System.out.println("Starting with: " + tabCols);
 			String sql = "";
 			String selectCol = "";
 			sql += "select\n";
@@ -141,7 +167,6 @@ public class DataTestPublishStage {
 			sql += "from\n";
 			sql += "  " + publishOwnerPrefix + tabCols.getKey() + "\n";
 			rset1 = stmt1.executeQuery(sql);
-
 			while (rset1.next()) {
 				counter++;
 				counterTotal++;
@@ -150,7 +175,9 @@ public class DataTestPublishStage {
 				sql += "select ";
 				sql += "count(*) ";
 				sql += "from ";
-				sql += stageOwnerPrefix + tabCols.getKey() + " ";
+				sql += tabCols.getKey().replace(tableNameReplaceFrom,
+						tableNameReplaceTo)
+						+ " ";
 				sql += "where ";
 				for (String col : tabCols.getValue()) {
 					if (whereColVal.length() != 0)
@@ -168,10 +195,9 @@ public class DataTestPublishStage {
 					System.out.println("FAILED: " + sql);
 					fail = true;
 				}
-				if (counter >= 500)
-				{
+				if (counter >= 500) {
 					counter = 0;
-					System.out.println(counterTotal + " records processed.");		
+					System.out.println(counterTotal + "/" + totalRecordCount + " records processed.");
 				}
 				rset2.close();
 			}
