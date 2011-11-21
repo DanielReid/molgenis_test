@@ -98,17 +98,20 @@ public class DataTestPublishStage {
 				}
 			} else {
 				System.out
-						.println("\tWARINING: ignoring table: "
+						.println("\tWARNING: ignoring table: "
 								+ rset1.getString(2) + " column: "
 								+ rset1.getString(3));
 			}
 		}
 	}
-	
-	public void getTotalRecordCount() throws Exception{
+
+	public void getTotalRecordCount() throws Exception {
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
-			rset1 = stmt1.executeQuery("select count(*) from " + publishOwnerPrefix + tabCols.getKey());
+			rset1 = stmt1.executeQuery("select count(*) from "
+					+ publishOwnerPrefix
+					+ tabCols.getKey().replace(tableNameReplaceFrom,
+							tableNameReplaceTo));
 			rset1.next();
 			totalRecordCount += Integer.parseInt(rset1.getString(1));
 		}
@@ -165,7 +168,10 @@ public class DataTestPublishStage {
 			}
 			sql += selectCol;
 			sql += "from\n";
-			sql += "  " + publishOwnerPrefix + tabCols.getKey() + "\n";
+			sql += "  "
+					+ publishOwnerPrefix
+					+ tabCols.getKey().replace(tableNameReplaceFrom,
+							tableNameReplaceTo) + "\n";
 			rset1 = stmt1.executeQuery(sql);
 			while (rset1.next()) {
 				counter++;
@@ -197,7 +203,8 @@ public class DataTestPublishStage {
 				}
 				if (counter >= 500) {
 					counter = 0;
-					System.out.println(counterTotal + "/" + totalRecordCount + " records processed.");
+					System.out.println(counterTotal + "/" + totalRecordCount
+							+ " records processed.");
 				}
 				rset2.close();
 			}

@@ -33,12 +33,11 @@ public class DataTestPublishStageLookup {
 		 */
 
 		DataTestPublishStage.excludedTables = new String[] {
-				"LL_DERIVED_VALUES", "LL_UVFAM" };
+				"LL_DERIVED_VALUES", "LL_ECGPARAM", "LL_UVFEMALE", "LL_UVFAM",
+				"LL_UVHEALTH", "LL_UVDEMOG" };
 		DataTestPublishStage.excludedColumns = new String[] { "STID", "PA_ID",
 				"GEBJAAR", "GEMEENTENAAM", "ID", "OVLJAAR", "PARTICIPST",
-				"UITSLOPM", "DATUM", "RACE", "RACE_TXT", "DATUM", "MEETSTAND",
-				"HR", "P", "PQ", "P_AXIS", "QRS", "QRS_AXIS", "QT", "QTC",
-				"T_AXIS" };
+				"UITSLOPM", "DATUM", "DATUM", "MEETSTAND" };
 
 		DataTestPublishStage.init();
 		DataTestPublishStage.getPublishTablesColumns();
