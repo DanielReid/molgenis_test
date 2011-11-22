@@ -9,7 +9,8 @@ public class DataTestPublishStageLookup {
 	@Test
 	public void init() throws Exception {
 
-		DataTestPublishStage.studie = "Test001";
+		// TODO when available in Publish database.
+		// DataTestPublishStage.studie = "";
 
 		DataTestPublishStage.dbDriver1 = "oracle.jdbc.driver.OracleDriver";
 		DataTestPublishStage.dbUrl1 = "jdbc:oracle:thin:@//localhost:2000/llptest";
@@ -22,8 +23,6 @@ public class DataTestPublishStageLookup {
 		DataTestPublishStage.dbPassword2 = "123456";
 
 		DataTestPublishStage.publishOwnerPrefix = "LLPOPER.";
-		DataTestPublishStage.tableNameReplaceFrom = "LL_";
-		DataTestPublishStage.tableNameReplaceTo = "";
 
 		// DEFAULTS:
 		/*
@@ -32,12 +31,8 @@ public class DataTestPublishStageLookup {
 		 * String[] { "STID", "PA_ID" };
 		 */
 
-		DataTestPublishStage.excludedTables = new String[] {
-				"LL_DERIVED_VALUES", "LL_ECGPARAM", "LL_UVFEMALE", "LL_UVFAM",
-				"LL_UVHEALTH", "LL_UVDEMOG" };
-		DataTestPublishStage.excludedColumns = new String[] { "STID", "PA_ID",
-				"GEBJAAR", "GEMEENTENAAM", "ID", "OVLJAAR", "PARTICIPST",
-				"UITSLOPM", "DATUM", "DATUM", "MEETSTAND" };
+		DataTestPublishStage.excludedTables = new String[] { "LL_DERIVED_VALUES" };
+		DataTestPublishStage.excludedColumns = new String[] { "STID", "PA_ID" };
 
 		DataTestPublishStage.init();
 		DataTestPublishStage.getPublishTablesColumns();

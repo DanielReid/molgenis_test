@@ -12,12 +12,19 @@ public class DataTestMatrixLookupOneFilter {
 		DataTestMatrix.dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
 		DataTestMatrix.dbUsername = "molgenis";
 		DataTestMatrix.dbPassword = "molTagtGen24Ora";
-		DataTestMatrix.file = "/pheno_complete.txt";
+
+		DataTestMatrix.file = "/pheno_one_filter.txt";
+
 		DataTestMatrix.testTablePrefix = "T2_";
 		DataTestMatrix.testOwner = "MOLGENIS";
-		DataTestMatrix.sourceTablePrefix = "LL_";
+		DataTestMatrix.sourceTablePrefix = "";
 		DataTestMatrix.sourceOwner = "LLPOPER";
 		DataTestMatrix.matrixSeperator = "\t";
+
+		DataTestMatrix.filter1Table = "UVPANAS";
+		DataTestMatrix.filter1Column = "PANAS1";
+		DataTestMatrix.filter1Operator = "=";
+		DataTestMatrix.filter1Value = "4";
 
 		DataTestMatrix.init();
 		DataTestMatrix.getMatrixColumnsIndex();
@@ -32,9 +39,8 @@ public class DataTestMatrixLookupOneFilter {
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	public void testCompareTablesOneFilter() throws Exception {
-		if (DataTestMatrix.compareFilteredTables("BEZOEK1", "GEWICHT", "=",
-				"50", null, null, null, null) == false)
+	public void testCompareTables() throws Exception {
+		if (DataTestMatrix.compareTables())
 			Assert.assertFalse(true);
 	}
 

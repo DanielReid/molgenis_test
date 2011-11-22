@@ -12,10 +12,12 @@ public class DataTestMatrixLookupComplete {
 		DataTestMatrix.dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
 		DataTestMatrix.dbUsername = "molgenis";
 		DataTestMatrix.dbPassword = "molTagtGen24Ora";
+
 		DataTestMatrix.file = "/pheno_complete.txt";
+
 		DataTestMatrix.testTablePrefix = "T2_";
 		DataTestMatrix.testOwner = "MOLGENIS";
-		DataTestMatrix.sourceTablePrefix = "LL_";
+		DataTestMatrix.sourceTablePrefix = "";
 		DataTestMatrix.sourceOwner = "LLPOPER";
 		DataTestMatrix.matrixSeperator = "\t";
 
@@ -33,7 +35,7 @@ public class DataTestMatrixLookupComplete {
 
 	@Test(dependsOnMethods = { "init" })
 	public void testCompareTables() throws Exception {
-		if (DataTestMatrix.compareTables() == false)
+		if (DataTestMatrix.compareTables())
 			Assert.assertFalse(true);
 	}
 

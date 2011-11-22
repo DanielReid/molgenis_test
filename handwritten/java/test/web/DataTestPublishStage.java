@@ -24,8 +24,6 @@ public class DataTestPublishStage {
 	String dbPassword2;
 
 	String publishOwnerPrefix;
-	String tableNameReplaceFrom;
-	String tableNameReplaceTo;
 
 	String[] excludedTables;
 	String[] excludedColumns;
@@ -65,13 +63,10 @@ public class DataTestPublishStage {
 				.println("Getting all the related tables form publ_dict_studie...");
 		String sql = "";
 		sql += "select\n";
-		sql += "  s.stid, pds.tabnaam, pds.veld\n";
+		sql += "  0, tabnaam, veld\n";
 		sql += "from\n";
-		sql += "LLPOPER.studie s\n";
-		sql += "  join\n";
-		sql += "  LLPOPER.publ_dict_studie pds\n";
-		sql += "  on s.stid = pds.stid\n";
-		sql += "where s.studie = '" + studie + "'\n";
+		sql += "  " + publishOwnerPrefix + "vw_dict\n";
+		sql += "  group by tabnaam, veld";
 		rset1 = stmt1.executeQuery(sql);
 		while (rset1.next()) {
 			Boolean TableOrColumnNotExcluded = true;
@@ -109,9 +104,7 @@ public class DataTestPublishStage {
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
 			rset1 = stmt1.executeQuery("select count(*) from "
-					+ publishOwnerPrefix
-					+ tabCols.getKey().replace(tableNameReplaceFrom,
-							tableNameReplaceTo));
+					+ publishOwnerPrefix + tabCols.getKey());
 			rset1.next();
 			totalRecordCount += Integer.parseInt(rset1.getString(1));
 		}
@@ -130,9 +123,7 @@ public class DataTestPublishStage {
 				sql += "from \n";
 				sql += "  INFORMATION_SCHEMA.COLUMNS \n";
 				sql += "where \n";
-				sql += "  TABLE_NAME = '"
-						+ tabCols.getKey().replace(tableNameReplaceFrom,
-								tableNameReplaceTo) + "' \n";
+				sql += "  TABLE_NAME = '" + tabCols.getKey() + "' \n";
 				sql += "  and COLUMN_NAME = '" + col + "' \n";
 				rset2 = stmt2.executeQuery(sql);
 				rset2.next();
@@ -168,10 +159,7 @@ public class DataTestPublishStage {
 			}
 			sql += selectCol;
 			sql += "from\n";
-			sql += "  "
-					+ publishOwnerPrefix
-					+ tabCols.getKey().replace(tableNameReplaceFrom,
-							tableNameReplaceTo) + "\n";
+			sql += "  " + publishOwnerPrefix + tabCols.getKey() + "\n";
 			rset1 = stmt1.executeQuery(sql);
 			while (rset1.next()) {
 				counter++;
@@ -181,9 +169,7 @@ public class DataTestPublishStage {
 				sql += "select ";
 				sql += "count(*) ";
 				sql += "from ";
-				sql += tabCols.getKey().replace(tableNameReplaceFrom,
-						tableNameReplaceTo)
-						+ " ";
+				sql += tabCols.getKey() + " ";
 				sql += "where ";
 				for (String col : tabCols.getValue()) {
 					if (whereColVal.length() != 0)
