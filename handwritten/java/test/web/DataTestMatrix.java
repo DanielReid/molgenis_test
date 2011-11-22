@@ -16,16 +16,30 @@ import java.util.Map;
 import com.google.common.base.Joiner;
 
 public class DataTestMatrix {
+
 	String dbDriver;
 	String dbUrl;
 	String dbUsername;
 	String dbPassword;
+
 	String file;
+
 	String testTablePrefix;
 	String testOwner;
 	String sourceTablePrefix;
 	String sourceOwner;
 	String matrixSeperator;
+
+	String filter1Table = "";
+	String filter1Column = "";
+	String filter1Operator = "";
+	String filter1Value = "";
+
+	String filter2Table = "";
+	String filter2Column = "";
+	String filter2Operator = "";
+	String filter2Value = "";
+
 	Statement stmt;
 	ResultSet rset;
 	String[] paidMatrixColumnNameParts;
@@ -82,8 +96,6 @@ public class DataTestMatrix {
 						+ matrixColumnParts[0], matrixColumnParts[1])) {
 					if (publishTablesColumns.get(matrixColumnParts[0]) == null) {
 						ArrayList<String> dbColumns = new ArrayList<String>();
-						// for every table add "PA_ID"
-						dbColumns.add(paidMatrixColumnNameParts[1]);
 						dbColumns.add(matrixColumnParts[1]);
 						publishTablesColumns.put(matrixColumnParts[0],
 								dbColumns);
@@ -225,83 +237,55 @@ public class DataTestMatrix {
 					+ ") select " + Joiner.on(", ").join(combineTableColumn)
 					+ " from " + testTablePrefix + "GLOBAL group by "
 					+ Joiner.on(", ").join(combineTableColumn);
-			System.out.println(sql);
+			stmt.executeQuery(sql);
 		}
 	}
 
 	public boolean compareTables() throws Exception {
-		boolean result = true;
+		boolean fail = false;
 		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
 				.entrySet()) {
 			System.out.println("Comparing " + entry.getKey() + "...");
 			for (String column : entry.getValue()) {
-				String sql = "select count(*) from (select case  when substr("
-						+ column + ", length(" + column
-						+ ")-1, 2) = '.0'  then substr(" + column
-						+ ", 0, length(" + column + ")-2) else " + column
-						+ " end as " + column + " from " + testTablePrefix
-						+ entry.getKey() + " minus select to_char(" + column
-						+ ") from " + sourceOwner + "." + sourceTablePrefix
-						+ entry.getKey() + ") ";
-				rset = stmt.executeQuery(sql);
-				rset.next();
-				if (rset.getString(1).equals("0")) {
-					System.out.println("SUCCES " + entry.getKey() + "__"
-							+ column + " data in source (with '.0' fix)");
-				} else {
-					result = false;
-					System.out.println("FAILED datacompare for: "
-							+ entry.getKey() + "__" + column);
-				}
+				String sql = "";
 
-			}
-		}
-		return result;
-	}
+				String sqlTestTable = "select case  when substr(" + column
+						+ ", length(" + column + ")-1, 2) = '.0'  then substr("
+						+ column + ", 0, length(" + column + ")-2) else "
+						+ column + " end as " + column + " from "
+						+ testTablePrefix + entry.getKey() + " ";
 
-	public boolean compareFilteredTables(String w1Table, String w1Column,
-			String w1Operator, String w1Value, String w2Table, String w2Column,
-			String w2Operator, String w2Value) throws Exception {
-		boolean result = true;
-		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
-				.entrySet()) {
-			System.out.println("Comparing " + entry.getKey() + "...");
-			for (String column : entry.getValue()) {
-				String sql = "select count(*) from (select case  when substr("
-						+ column + ", length(" + column
-						+ ")-1, 2) = '.0'  then substr(" + column
-						+ ", 0, length(" + column + ")-2) else " + column
-						+ " end as " + column + " from " + testTablePrefix
-						+ entry.getKey() + " minus select to_char(" + column
-						+ ") from " + sourceOwner + "." + sourceTablePrefix
+				String sqlSourceTable = "select to_char(" + column + ") from "
+						+ sourceOwner + "." + sourceTablePrefix
 						+ entry.getKey() + " ";
-				if (entry.getKey().equals(w1Table)
-						&& entry.getKey().equals(w2Table)) {
-					sql += "where " + w1Column + " " + w1Operator + " '"
-							+ w1Value + "' and " + w2Column + " " + w2Operator
-							+ " '" + w2Value + "' ";
-				} else if (entry.getKey().equals(w1Table)) {
-					sql += "where " + w1Column + " " + w1Operator + " '"
-							+ w1Value + "' ";
-				} else if (entry.getKey().equals(w2Table)) {
-					sql += "where " + w2Column + " " + w2Operator + " '"
-							+ w2Value + "' ";
-				}
-				sql += ")";
+
+				if (filter1Table.length() != 0
+						&& filter1Table.equals(entry.getKey()))
+					sqlSourceTable += "where " + filter1Column + " "
+							+ filter1Operator + " '" + filter1Value + "' ";
+
+				if (filter2Table.length() != 0
+						&& filter2Table.equals(entry.getKey()))
+					sqlSourceTable += "and " + filter2Column + " "
+							+ filter2Operator + " '" + filter2Value + "' ";
+
+				sql = "select count(*) from (" + sqlTestTable + " minus "
+						+ sqlSourceTable + ")";
+
 				rset = stmt.executeQuery(sql);
 				rset.next();
-				if (rset.getString(1).equals("0")) {
+				if (Integer.parseInt(rset.getString(1)) == 0) {
 					System.out.println("SUCCES " + entry.getKey() + "__"
 							+ column + " data in source (with '.0' fix)");
 				} else {
-					result = false;
+					fail = true;
 					System.out.println("FAILED datacompare for: "
 							+ entry.getKey() + "__" + column);
 				}
 
 			}
 		}
-		return result;
+		return fail;
 	}
 
 }

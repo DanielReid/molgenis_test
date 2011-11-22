@@ -12,12 +12,24 @@ public class DataTestMatrixLookupTwoFilters {
 		DataTestMatrix.dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
 		DataTestMatrix.dbUsername = "molgenis";
 		DataTestMatrix.dbPassword = "molTagtGen24Ora";
-		DataTestMatrix.file = "/pheno_complete.txt";
+
+		DataTestMatrix.file = "/pheno_two_filters.txt";
+
 		DataTestMatrix.testTablePrefix = "T2_";
 		DataTestMatrix.testOwner = "MOLGENIS";
-		DataTestMatrix.sourceTablePrefix = "LL_";
+		DataTestMatrix.sourceTablePrefix = "";
 		DataTestMatrix.sourceOwner = "LLPOPER";
 		DataTestMatrix.matrixSeperator = "\t";
+
+		DataTestMatrix.filter1Table = "UVPANAS";
+		DataTestMatrix.filter1Column = "PANAS1";
+		DataTestMatrix.filter1Operator = "=";
+		DataTestMatrix.filter1Value = "4";
+
+		DataTestMatrix.filter2Table = "UVPANAS";
+		DataTestMatrix.filter2Column = "PANAS2";
+		DataTestMatrix.filter2Operator = "=";
+		DataTestMatrix.filter2Value = "3";
 
 		DataTestMatrix.init();
 		DataTestMatrix.getMatrixColumnsIndex();
@@ -32,9 +44,8 @@ public class DataTestMatrixLookupTwoFilters {
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	public void testCompareTablesTwoFilters() throws Exception {
-		if (DataTestMatrix.compareFilteredTables("BEZOEK1", "GEWICHT", "=",
-				"50", "PATIENT", "GESLACHT", "=", "2") == false)
+	public void testCompareTables() throws Exception {
+		if (DataTestMatrix.compareTables())
 			Assert.assertFalse(true);
 	}
 
