@@ -23,8 +23,6 @@ public class DataTestPublishStage {
 	String dbUsername2;
 	String dbPassword2;
 
-	String publishOwnerPrefix;
-
 	String[] excludedTables;
 	String[] excludedColumns;
 
@@ -65,7 +63,7 @@ public class DataTestPublishStage {
 		sql += "select\n";
 		sql += "  0, tabnaam, veld\n";
 		sql += "from\n";
-		sql += "  " + publishOwnerPrefix + "vw_dict\n";
+		sql += "  vw_dict\n";
 		sql += "  group by tabnaam, veld";
 		rset1 = stmt1.executeQuery(sql);
 		while (rset1.next()) {
@@ -104,7 +102,7 @@ public class DataTestPublishStage {
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
 			rset1 = stmt1.executeQuery("select count(*) from "
-					+ publishOwnerPrefix + tabCols.getKey());
+					+ tabCols.getKey());
 			rset1.next();
 			totalRecordCount += Integer.parseInt(rset1.getString(1));
 		}
@@ -144,6 +142,8 @@ public class DataTestPublishStage {
 		Boolean fail = false;
 		Integer counter = 0;
 		Integer counterTotal = 0;
+		Integer counterFail = 0;
+		String failMessage = "";
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
 			System.out.println("Starting with: " + tabCols);
@@ -159,7 +159,7 @@ public class DataTestPublishStage {
 			}
 			sql += selectCol;
 			sql += "from\n";
-			sql += "  " + publishOwnerPrefix + tabCols.getKey() + "\n";
+			sql += "  " + tabCols.getKey() + "\n";
 			rset1 = stmt1.executeQuery(sql);
 			while (rset1.next()) {
 				counter++;
@@ -186,11 +186,18 @@ public class DataTestPublishStage {
 				if (rset2.getString(1).equals("0")) {
 					System.out.println("FAILED: " + sql);
 					fail = true;
+					failMessage = "PREVIOUSLY FAILED: ";
+					counterFail++;
+					if (counterFail >= 100)
+					{
+						System.out.println("FAIL COUNT IS >= 100, ENDING TEST...");
+						return true;
+					}
 				}
 				if (counter >= 500) {
 					counter = 0;
-					System.out.println(counterTotal + "/" + totalRecordCount
-							+ " records processed.");
+					System.out.println(failMessage + counterTotal + "/"
+							+ totalRecordCount + " records processed.");
 				}
 				rset2.close();
 			}
