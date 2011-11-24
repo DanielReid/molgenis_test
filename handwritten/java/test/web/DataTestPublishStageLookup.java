@@ -13,7 +13,8 @@ public class DataTestPublishStageLookup {
 		// DataTestPublishStage.studie = "";
 
 		DataTestPublishStage.dbDriver1 = "oracle.jdbc.driver.OracleDriver";
-		DataTestPublishStage.dbUrl1 = "jdbc:oracle:thin:@//localhost:2000/llptest";
+		String database = "llptest";
+		DataTestPublishStage.dbUrl1 = "jdbc:oracle:thin:@//localhost:2000/" + database;
 		DataTestPublishStage.dbUsername1 = "molgenis";
 		DataTestPublishStage.dbPassword1 = "molTagtGen24Ora";
 
@@ -22,17 +23,15 @@ public class DataTestPublishStageLookup {
 		DataTestPublishStage.dbUsername2 = "sa";
 		DataTestPublishStage.dbPassword2 = "123456";
 
-		DataTestPublishStage.publishOwnerPrefix = "LLPOPER.";
-
 		// DEFAULTS:
 		/*
 		 * DataTestPublishStage.excludedTables = new String[] {
 		 * "LL_DERIVED_VALUES" }; DataTestPublishStage.excludedColumns = new
-		 * String[] { "STID", "PA_ID" };
+		 * String[] { "STID", "PA_ID", "ID" };
 		 */
 
 		DataTestPublishStage.excludedTables = new String[] { "LL_DERIVED_VALUES" };
-		DataTestPublishStage.excludedColumns = new String[] { "STID", "PA_ID" };
+		DataTestPublishStage.excludedColumns = new String[] { "STID", "PA_ID", "ID" };
 
 		DataTestPublishStage.init();
 		DataTestPublishStage.getPublishTablesColumns();
