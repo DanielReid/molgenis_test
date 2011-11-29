@@ -17,11 +17,12 @@ public class DataTestPublishStageLookup {
 		DataTestPublishStage.dbUrl1 = "jdbc:oracle:thin:@//localhost:2000/" + database;
 		DataTestPublishStage.dbUsername1 = "molgenis";
 		DataTestPublishStage.dbPassword1 = "molTagtGen24Ora";
-
+		
+		String server2 = "W3ZKHAS323";
+		String database2 = "LLCDR_Stage";
 		DataTestPublishStage.dbDriver2 = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		DataTestPublishStage.dbUrl2 = "jdbc:sqlserver://W3ZKHAS323;databaseName=LLCDR_Stage;integratedSecurity=true";
-		DataTestPublishStage.dbUsername2 = "sa";
-		DataTestPublishStage.dbPassword2 = "123456";
+		DataTestPublishStage.dbUrl2 = "jdbc:sqlserver://" + server2
+				+ ";databaseName=" + database2 + ";integratedSecurity=true";		
 
 		// DEFAULTS:
 		/*
