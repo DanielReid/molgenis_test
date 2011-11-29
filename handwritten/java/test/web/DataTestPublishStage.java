@@ -20,8 +20,6 @@ public class DataTestPublishStage {
 
 	String dbDriver2;
 	String dbUrl2;
-	String dbUsername2;
-	String dbPassword2;
 
 	String[] excludedTables;
 	String[] excludedColumns;
@@ -48,8 +46,7 @@ public class DataTestPublishStage {
 		}
 		try {
 			Class.forName(dbDriver2);
-			Connection conn = DriverManager.getConnection(dbUrl2, dbUsername2,
-					dbPassword2);
+			Connection conn = DriverManager.getConnection(dbUrl2);
 			stmt2 = conn.createStatement();
 		} catch (Exception e) {
 			System.out.println(e);
