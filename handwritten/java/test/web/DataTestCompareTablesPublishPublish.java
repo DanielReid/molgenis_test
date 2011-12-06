@@ -9,29 +9,29 @@ public class DataTestCompareTablesPublishPublish {
 	@Test
 	public void init() throws Exception {
 		DataTestCompareTables.dbDriverOracle = "oracle.jdbc.driver.OracleDriver";
-		String database1 = "llptest";
+		String databaseOracle = "llptest";
 		DataTestCompareTables.dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/"
-				+ database1;
+				+ databaseOracle;
 		DataTestCompareTables.dbUsernameOracle = "molgenis";
 		DataTestCompareTables.dbPasswordOracle = "molTagtGen24Ora";
+		DataTestCompareTables.sqlQueryOracle = "select s.synonym_name, atc.column_name  from all_tab_columns atc left join all_synonyms s on (atc.owner = s.table_owner and atc.table_name = s.table_name) where s.owner = 'MOLGENIS'";
 
-		String server2 = "W3ZKHAS323";
-		// String server2 = "09-000-4718\\SQLEXPRESS";
-		String database2 = "LLCDR_Publ";
+		String serverMSSQL = "W3ZKHAS323";
+		String databaseMSSQL = "LLCDR_Publ";
 		DataTestCompareTables.dbDriverMSSQL = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		DataTestCompareTables.dbUrlMSSQL = "jdbc:sqlserver://" + server2
-				+ ";databaseName=" + database2 + ";integratedSecurity=true";
+		DataTestCompareTables.dbUrlMSSQL = "jdbc:sqlserver://" + serverMSSQL
+				+ ";databaseName=" + databaseMSSQL + ";integratedSecurity=true";
+		DataTestCompareTables.sqlQueryMSSQL = "select TABLE_NAME, COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS";
 
-		/*
-		 * DataTestCompareTables.excludedTables = new String[] { "VW_LABDATA",
-		 * "PATIENT", "UVPANAS", "VW_DICT_REFS", "VW_BLOEDDRUKAVG", "BEZOEK",
-		 * "VW_UVPANAS", "VW_BEZOEK", "VW_PATIENT", "VW_BEZOEK1",
-		 * "BLOEDDRUKAVG", "VW_DICT", "VW_DICT_VALUESETS", "BEZOEK1",
-		 * "BEP_OMSCHR", "VW_BEP_OMSCHR" };
-		 */
+		DataTestCompareTables.excludedTables = new String[] { "PUBL_DICT",
+				"DICT_REF", "SETTINGS", "PUBL_DICT_REFS", "DICT", "VW_LABDATA",
+				"VW_BLOEDDRUKAVG", "VW_BEZOEK1", "VW_UVPANAS", "VW_BEZOEK",
+				"VW_BEP_OMSCHR", "VW_PATIENT" };
+		
+		DataTestCompareTables.excludedColumns = new String[] { "ID" };
 
-		DataTestCompareTables.excludedTables = new String[] {};
-		DataTestCompareTables.excludedColumns = new String[] {};
+		// DataTestCompareTables.excludedTables = new String[] {};
+		// DataTestCompareTables.excludedColumns = new String[] {};
 
 		DataTestCompareTables.init();
 		DataTestCompareTables.getPublishUmcgTablesColumns();

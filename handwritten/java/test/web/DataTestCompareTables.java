@@ -27,9 +27,11 @@ public class DataTestCompareTables {
 	String dbUrlOracle;
 	String dbUsernameOracle;
 	String dbPasswordOracle;
+	String sqlQueryOracle;
 
 	String dbDriverMSSQL;
 	String dbUrlMSSQL;
+	String sqlQueryMSSQL;
 
 	String[] excludedTables;
 	String[] excludedColumns;
@@ -78,7 +80,7 @@ public class DataTestCompareTables {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		// Print out excluded table and columns for the test log. 
+		// Print out excluded table and columns for the test log.
 		if (excludedTables.length != 0)
 			System.out.println("WARNING EXCLUDED TABLES: "
 					+ Arrays.toString(excludedTables));
@@ -88,111 +90,120 @@ public class DataTestCompareTables {
 	}
 
 	/*
-	 ************************************************************************
-	 *
-	 * 	Method : getPublishUmcgTablesColumns() 
-	 * 	Purpose: Get all UMCG/Publish tables and columns.
-	 *
-	 ************************************************************************
-	 */	
+	 * ***********************************************************************
+	 * 
+	 * Method : getPublishUmcgTablesColumns() Purpose: Get all UMCG/Publish
+	 * tables and columns.
+	 * 
+	 * ***********************************************************************
+	 */
 	public void getPublishUmcgTablesColumns() throws Exception {
 		// Select all tables and columns from the UMCG Publish database
-		rsetMSSQL = stmtMSSQL
-				.executeQuery("select TABLE_NAME, COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS");
+		rsetMSSQL = stmtMSSQL.executeQuery(sqlQueryMSSQL);
 		while (rsetMSSQL.next()) {
 			// Check if the table or column is excluded.
 			Boolean TableOrColumnNotExcluded = true;
 			for (int i = 0; i < excludedTables.length; i++) {
-				if (excludedTables[i].equals(rsetMSSQL.getString(1)))
+				if (excludedTables[i].toUpperCase().equals(
+						rsetMSSQL.getString(1).toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			for (int i = 0; i < excludedColumns.length; i++) {
-				if (excludedColumns[i].equals(rsetMSSQL.getString(2)))
+				if (excludedColumns[i].toUpperCase().equals(
+						rsetMSSQL.getString(2).toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			if (TableOrColumnNotExcluded) {
-				// Put table and columns relations in a global variable publishUmcgTablesColumns
-				if (publishUmcgTablesColumns.get(rsetMSSQL.getString(1)) == null) {
+				// Put table and columns relations in a global variable
+				// publishUmcgTablesColumns
+				if (publishUmcgTablesColumns.get(rsetMSSQL.getString(1)
+						.toUpperCase()) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns.add(rsetMSSQL.getString(2));
-					publishUmcgTablesColumns.put(rsetMSSQL.getString(1),
-							dbColumns);
+					dbColumns.add(rsetMSSQL.getString(2).toUpperCase());
+					publishUmcgTablesColumns.put(rsetMSSQL.getString(1)
+							.toUpperCase(), dbColumns);
 				} else {
 					ArrayList<String> dbColumns = new ArrayList<String>();
 					dbColumns = publishUmcgTablesColumns.get(rsetMSSQL
-							.getString(1));
-					if (dbColumns.contains(rsetMSSQL.getString(2)) == false)
-						dbColumns.add(rsetMSSQL.getString(2));
-					publishUmcgTablesColumns.put(rsetMSSQL.getString(1),
-							dbColumns);
+							.getString(1).toUpperCase());
+					if (dbColumns
+							.contains(rsetMSSQL.getString(2).toUpperCase()) == false)
+						dbColumns.add(rsetMSSQL.getString(2).toUpperCase());
+					publishUmcgTablesColumns.put(rsetMSSQL.getString(1)
+							.toUpperCase(), dbColumns);
 				}
 			}
 		}
 	}
 
 	/*
-	 ************************************************************************
-	 *
-	 * 	Method : getPublishCitTablesColumns() 
-	 * 	Purpose: Get all CIT/Publish tables and columns.
-	 *
-	 ************************************************************************
-	 */	
+	 * ***********************************************************************
+	 * 
+	 * Method : getPublishCitTablesColumns() Purpose: Get all CIT/Publish tables
+	 * and columns.
+	 * 
+	 * ***********************************************************************
+	 */
 	public void getPublishCitTablesColumns() throws Exception {
 		// Select all tables and columns from the UMCG Publish database
-		rsetOracle = stmtOracle
-				.executeQuery("select s.synonym_name, atc.column_name  from all_tab_columns atc left join all_synonyms s on (atc.owner = s.table_owner and atc.table_name = s.table_name) where s.owner = 'MOLGENIS'");
+		rsetOracle = stmtOracle.executeQuery(sqlQueryOracle);
 		while (rsetOracle.next()) {
 			// Check if the table or column is excluded.
 			Boolean TableOrColumnNotExcluded = true;
 			for (int i = 0; i < excludedTables.length; i++) {
-				if (excludedTables[i].equals(rsetOracle.getString(1)))
+				if (excludedTables[i].equals(rsetOracle.getString(1)
+						.toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			for (int i = 0; i < excludedColumns.length; i++) {
-				if (excludedColumns[i].equals(rsetOracle.getString(2)))
+				if (excludedColumns[i].equals(rsetOracle.getString(2)
+						.toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			if (TableOrColumnNotExcluded) {
-				// Put table and columns relations in a global variable publishCitTablesColumns
-				if (publishCitTablesColumns.get(rsetOracle.getString(1)) == null) {
+				// Put table and columns relations in a global variable
+				// publishCitTablesColumns
+				if (publishCitTablesColumns.get(rsetOracle.getString(1)
+						.toUpperCase()) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns.add(rsetOracle.getString(2));
-					publishCitTablesColumns.put(rsetOracle.getString(1),
-							dbColumns);
+					dbColumns.add(rsetOracle.getString(2).toUpperCase());
+					publishCitTablesColumns.put(rsetOracle.getString(1)
+							.toUpperCase(), dbColumns);
 				} else {
 					ArrayList<String> dbColumns = new ArrayList<String>();
 					dbColumns = publishCitTablesColumns.get(rsetOracle
-							.getString(1));
-					if (dbColumns.contains(rsetOracle.getString(2)) == false)
-						dbColumns.add(rsetOracle.getString(2));
-					publishCitTablesColumns.put(rsetOracle.getString(1),
-							dbColumns);
+							.getString(1).toUpperCase());
+					if (dbColumns.contains(rsetOracle.getString(2)
+							.toUpperCase()) == false)
+						dbColumns.add(rsetOracle.getString(2).toUpperCase());
+					publishCitTablesColumns.put(rsetOracle.getString(1)
+							.toUpperCase(), dbColumns);
 				}
 			}
 		}
 	}
-	
+
 	/*
-	 ************************************************************************
-	 *
-	 * 	Method : compareTableColumns() 
-	 * 	Purpose: Compare the table and column structure from both Publish
-	 *  databases
-	 *
-	 ************************************************************************
-	 */	
+	 * ***********************************************************************
+	 * 
+	 * Method : compareTableColumns() Purpose: Compare the table and column
+	 * structure from both Publish databases
+	 * 
+	 * ***********************************************************************
+	 */
 	public boolean compareTableColumns() {
 		Boolean fail = false;
 		Map<String, ArrayList<String>> notInCit = new HashMap<String, ArrayList<String>>();
 		Map<String, ArrayList<String>> notInUmcg = new HashMap<String, ArrayList<String>>();
-		// Lookup missing publishUmcgTablesColumns in publishCitTablesColumns and put the optional results in notInCit.
+		// Lookup missing publishUmcgTablesColumns in publishCitTablesColumns
+		// and put the optional results in notInCit.
 		for (Map.Entry<String, ArrayList<String>> tabColsUmcg : publishUmcgTablesColumns
 				.entrySet()) {
 			String tab = tabColsUmcg.getKey();
 			for (String col : tabColsUmcg.getValue()) {
 				try {
-					publishCitTablesColumns.get(tab).contains(col);
+					if (publishCitTablesColumns.get(tab).contains(col) == false)
+						throw new Exception();
 				} catch (Exception e) {
 					fail = true;
 
@@ -211,13 +222,15 @@ public class DataTestCompareTables {
 				}
 			}
 		}
-		// Lookup missing publishCitTablesColumns in publishUmcgTablesColumns and put the optional results in notInCit.
+		// Lookup missing publishCitTablesColumns in publishUmcgTablesColumns
+		// and put the optional results in notInCit.
 		for (Map.Entry<String, ArrayList<String>> tabColsCit : publishCitTablesColumns
 				.entrySet()) {
 			String tab = tabColsCit.getKey();
 			for (String col : tabColsCit.getValue()) {
 				try {
-					publishUmcgTablesColumns.get(tab).contains(col);
+					if (publishUmcgTablesColumns.get(tab).contains(col) == false)
+						throw new Exception();
 				} catch (Exception e) {
 					fail = true;
 					if (notInUmcg.get(tab) == null) {
@@ -251,15 +264,14 @@ public class DataTestCompareTables {
 	}
 
 	/*
-	 ************************************************************************
-	 *
-	 * 	Method : rowCountUmcgVersusCit() 
-	 * 	Purpose: Compare row count Publish databases.
-	 *  Get a total row count of all tables.
-	 *  
-	 *
-	 ************************************************************************
-	 */	
+	 * ***********************************************************************
+	 * 
+	 * Method : rowCountUmcgVersusCit() Purpose: Compare row count Publish
+	 * databases. Get a total row count of all tables.
+	 * 
+	 * 
+	 * ***********************************************************************
+	 */
 	public boolean rowCountUmcgVersusCit() throws Exception {
 		System.out.println("Starting rowcount...");
 		Boolean fail = false;
@@ -289,13 +301,13 @@ public class DataTestCompareTables {
 	}
 
 	/*
-	 ************************************************************************
-	 *
-	 * 	Method : lookupDataUmcgInCit() 
-	 * 	Purpose: Lookup all table rows from Publish UMCG in Publish CIT.
-	 *  
-	 ************************************************************************
-	 */		
+	 * ***********************************************************************
+	 * 
+	 * Method : lookupDataUmcgInCit() Purpose: Lookup all table rows from
+	 * Publish UMCG in Publish CIT.
+	 * 
+	 * ***********************************************************************
+	 */
 	public boolean lookupDataUmcgInCit() throws Exception {
 		System.out
 				.println("Starting with Publish MSSQL UMCG lookup in Publish Oracle CIT.");
@@ -304,7 +316,7 @@ public class DataTestCompareTables {
 		Integer counterTotal = 0;
 		Integer counterFail = 0;
 		String failMessage = "";
-		//Loop table columns
+		// Loop table columns
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishUmcgTablesColumns
 				.entrySet()) {
 			System.out.println("Processing: " + tabCols);
@@ -417,13 +429,13 @@ public class DataTestCompareTables {
 	}
 
 	/*
-	 ************************************************************************
-	 *
-	 * 	Method : lookupDataUmcgInCit() 
-	 * 	Purpose: Lookup all table rows from Publish CIT in Publish UMCG.
-	 *  
-	 ************************************************************************
-	 */		
+	 * ***********************************************************************
+	 * 
+	 * Method : lookupDataUmcgInCit() Purpose: Lookup all table rows from
+	 * Publish CIT in Publish UMCG.
+	 * 
+	 * ***********************************************************************
+	 */
 	public boolean lookupDataCitInUmcg() throws Exception {
 		System.out
 				.println("Starting with Publish Oracle Cit lookup in Publish MSSQL Umcg.");
