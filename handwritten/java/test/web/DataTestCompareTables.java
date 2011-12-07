@@ -47,6 +47,9 @@ public class DataTestCompareTables {
 	PreparedStatement psMSSQL;
 
 	Integer stid;
+	Integer counterFailLimit;
+	Integer debugRows;
+	Boolean debug;
 	Integer totalRecordCount = 0;
 
 	Map<String, ArrayList<String>> publishUmcgTablesColumns = new HashMap<String, ArrayList<String>>();
@@ -87,6 +90,8 @@ public class DataTestCompareTables {
 		if (excludedColumns.length != 0)
 			System.out.println("WARNING EXCLUDED COLUMNS: "
 					+ Arrays.toString(excludedColumns));
+		if (debug)
+			System.out.println("DEBUG MODE " + debugRows + " ROWS/TABLE ");
 	}
 
 	/*
@@ -116,8 +121,7 @@ public class DataTestCompareTables {
 			if (TableOrColumnNotExcluded) {
 				// Put table and columns relations in a global variable
 				// publishUmcgTablesColumns
-				if (publishUmcgTablesColumns.get(rsetMSSQL.getString(1)
-						.toUpperCase()) == null) {
+				if (publishUmcgTablesColumns.get(rsetMSSQL.getString(1)) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
 					dbColumns.add(rsetMSSQL.getString(2).toUpperCase());
 					publishUmcgTablesColumns.put(rsetMSSQL.getString(1)
@@ -163,8 +167,7 @@ public class DataTestCompareTables {
 			if (TableOrColumnNotExcluded) {
 				// Put table and columns relations in a global variable
 				// publishCitTablesColumns
-				if (publishCitTablesColumns.get(rsetOracle.getString(1)
-						.toUpperCase()) == null) {
+				if (publishCitTablesColumns.get(rsetOracle.getString(1)) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
 					dbColumns.add(rsetOracle.getString(2).toUpperCase());
 					publishCitTablesColumns.put(rsetOracle.getString(1)
@@ -285,7 +288,7 @@ public class DataTestCompareTables {
 			if (Integer.parseInt(rsetMSSQL.getString(1)) == Integer
 					.parseInt(rsetOracle.getString(1))) {
 				System.out.println("Rowcount " + tabColsUmcg.getKey()
-						+ " both: " + rsetMSSQL.getString(1) + ".");
+						+ " both: '" + rsetMSSQL.getString(1) + "'.");
 			} else {
 				fail = true;
 				System.out.println("FAILED: Rowcount " + tabColsUmcg.getKey()
@@ -315,7 +318,6 @@ public class DataTestCompareTables {
 		Integer counter = 0;
 		Integer counterTotal = 0;
 		Integer counterFail = 0;
-		String failMessage = "";
 		// Loop table columns
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishUmcgTablesColumns
 				.entrySet()) {
@@ -323,7 +325,10 @@ public class DataTestCompareTables {
 			// Select a table from UMCG publish.
 			String sql = "";
 			String selectCol = "";
-			sql += "select\n";
+			sql += "select ";
+			if (debug)
+				sql += "top " + debugRows + " ";
+			sql += "\n";
 			for (String col : tabCols.getValue()) {
 				if (selectCol.length() == 0)
 					selectCol += "  ";
@@ -345,26 +350,32 @@ public class DataTestCompareTables {
 				for (String col : tabCols.getValue()) {
 					if (whereColVal.length() != 0)
 						whereColVal += "and ";
-					whereColVal += col + " ";
-					if (rsetMSSQL.getString(col) == null)
-						whereColVal += "is null ";
+					if (rsetMSSQL.getString(col) == null
+							|| rsetMSSQL.getString(col).isEmpty())
+						whereColVal += col + " is null ";
 					else
-						whereColVal += " = ? ";
+						whereColVal += col + " = ? ";
 				}
 				sql += whereColVal;
 				psOracle = connOracle.prepareStatement(sql);
 				Integer psIndex = 0;
 				// Switch data types and input data.
 				for (String col : tabCols.getValue()) {
-					if (rsetMSSQL.getString(col) != null) {
+					if (!(rsetMSSQL.getString(col) == null || rsetMSSQL
+							.getString(col).isEmpty())) {
 						psIndex++;
 						String datatype = rsetMSSQL.getMetaData()
 								.getColumnTypeName(rsetMSSQL.findColumn(col));
 						if (datatype == "int")
 							psOracle.setInt(psIndex, rsetMSSQL.getInt(col));
+						else if (datatype == "smallint")
+							psOracle.setShort(psIndex, rsetMSSQL.getShort(col));
 						else if (datatype == "tinyint")
 							psOracle.setShort(psIndex, rsetMSSQL.getShort(col));
 						else if (datatype == "numeric")
+							psOracle.setBigDecimal(psIndex,
+									rsetMSSQL.getBigDecimal(col));
+						else if (datatype == "decimal")
 							psOracle.setBigDecimal(psIndex,
 									rsetMSSQL.getBigDecimal(col));
 						else if (datatype == "datetime")
@@ -373,11 +384,22 @@ public class DataTestCompareTables {
 						else if (datatype == "varchar")
 							psOracle.setString(psIndex,
 									rsetMSSQL.getString(col));
-						else
+						else if (datatype == "nvarchar")
+							psOracle.setString(psIndex,
+									rsetMSSQL.getString(col));
+						else if (datatype == "uniqueidentifier")
+							psOracle.setString(psIndex,
+									"{" + rsetMSSQL.getString(col) + "}");
+						else if (datatype == "bigint")
+							psOracle.setLong(psIndex, rsetMSSQL.getLong(col));
+						else {
+							psOracle.setString(psIndex,
+									rsetMSSQL.getString(col));
 							System.out
-									.println("DATATYPE CONVERSION FOR'"
+									.println("DATATYPE CONVERSION FOR '"
 											+ datatype
 											+ "' MUST BE ADDED TO THIS TEST");
+						}
 					}
 				}
 				// Lookup row in CIT Publish.
@@ -386,38 +408,43 @@ public class DataTestCompareTables {
 				Integer rows = rsetOracle.getInt(1);
 				rsetOracle.close();
 				psOracle.close();
-				if (rows == 0) {
+
+				Boolean failCurrentRow = false;
+				if (rows < 1) {
 					fail = true;
-					failMessage = "PREVIOUSLY FAILED: ";
+					failCurrentRow = true;
 					counterFail++;
-					if (counterFail >= 100) {
-						System.out
-								.println("FAILED: COUNT IS >= 100, ENDING TEST...");
-						return true;
-					}
+				}
+				if (rows > 1) {
+					// Investigate duplicate rows.
+				}
+				if (failCurrentRow) {
 					// Reconstruction for user output.
 					sql = "select * from " + tabCols.getKey() + " where ";
 					whereColVal = "";
 					for (String col : tabCols.getValue()) {
 						if (whereColVal.length() != 0)
 							whereColVal += "and ";
-						whereColVal += col + " ";
 						if (rsetMSSQL.getString(col) == null)
-							whereColVal += "is null ";
+							whereColVal += col + " is null ";
 						else
-							whereColVal += " = '" + rsetMSSQL.getString(col)
-									+ "' ";
+							whereColVal += col + " = '"
+									+ rsetMSSQL.getString(col) + "' ";
 					}
 					sql += whereColVal;
-					System.out.println("FAILED: lookup in Publish Oracle CIT: "
-							+ sql);
+					System.out.println("FAILED:"
+							+ " lookup in Publish Oracle CIT: " + sql);
+					if (counterFail >= counterFailLimit) {
+						System.out.println("FAILED: FAIL COUNT IS >= "
+								+ counterFailLimit + ", ENDING TEST...");
+						return true;
+					}
 				}
 				// Give feedback every 500 rows.
 				if (counter >= 500) {
 					counter = 0;
 					System.out
-							.println(failMessage
-									+ counterTotal
+							.println(counterTotal
 									+ "/"
 									+ totalRecordCount
 									+ " records processed (1/2 Publish MSSQL UMCG lookup in Publish Oracle CIT).");
@@ -443,7 +470,6 @@ public class DataTestCompareTables {
 		Integer counter = 0;
 		Integer counterTotal = 0;
 		Integer counterFail = 0;
-		String failMessage = "";
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishCitTablesColumns
 				.entrySet()) {
 			System.out.println("Processing: " + tabCols);
@@ -460,6 +486,8 @@ public class DataTestCompareTables {
 			sql += selectCol;
 			sql += "from\n";
 			sql += "  " + tabCols.getKey() + "\n";
+			if (debug)
+				sql += "where rownum <= " + debugRows + " ";
 			rsetOracle = stmtOracle.executeQuery(sql);
 			while (rsetOracle.next()) {
 				counter++;
@@ -469,11 +497,11 @@ public class DataTestCompareTables {
 				for (String col : tabCols.getValue()) {
 					if (whereColVal.length() != 0)
 						whereColVal += "and ";
-					whereColVal += col + " ";
 					if (rsetOracle.getString(col) == null)
-						whereColVal += "is null ";
+						whereColVal += "(" + col + " is null or len(" + col
+								+ ") = 0) ";
 					else
-						whereColVal += " = ? ";
+						whereColVal += col + " = ? ";
 				}
 				sql += whereColVal;
 				psMSSQL = connMSSQL.prepareStatement(sql);
@@ -492,11 +520,17 @@ public class DataTestCompareTables {
 						else if (datatype == "VARCHAR2")
 							psMSSQL.setString(psIndex,
 									rsetOracle.getString(col));
-						else
+						else if (datatype == "NVARCHAR2")
+							psMSSQL.setString(psIndex,
+									rsetOracle.getString(col));
+						else {
+							psMSSQL.setString(psIndex,
+									rsetOracle.getString(col));
 							System.out
 									.println("DATATYPE CONVERSION FOR'"
 											+ datatype
 											+ "' MUST BE ADDED TO THIS TEST");
+						}
 					}
 				}
 				rsetMSSQL = psMSSQL.executeQuery();
@@ -504,15 +538,16 @@ public class DataTestCompareTables {
 				Integer rows = rsetMSSQL.getInt(1);
 				rsetMSSQL.close();
 				psMSSQL.close();
-				if (rows == 0) {
+				Boolean failCurrentRow = false;
+				if (rows < 1) {
 					fail = true;
-					failMessage = "PREVIOUSLY FAILED: ";
+					failCurrentRow = true;
 					counterFail++;
-					if (counterFail >= 100) {
-						System.out
-								.println("FAIL COUNT IS >= 100, ENDING TEST...");
-						return true;
-					}
+				}
+				if (rows > 1) {
+					// Investigate duplicate rows.
+				}
+				if (failCurrentRow) {
 					// Reconstruction for user output.
 					sql = "select * from " + tabCols.getKey() + " where ";
 					whereColVal = "";
@@ -521,7 +556,8 @@ public class DataTestCompareTables {
 							whereColVal += "and ";
 						whereColVal += col + " ";
 						if (rsetOracle.getString(col) == null)
-							whereColVal += "is null ";
+							whereColVal += "(" + col + " is null or len(" + col
+									+ ") = 0) ";
 						else
 							whereColVal += " = '" + rsetOracle.getString(col)
 									+ "' ";
@@ -529,12 +565,16 @@ public class DataTestCompareTables {
 					sql += whereColVal;
 					System.out.println("FAILED: lookup in Publish MSSQL Umcg: "
 							+ sql);
+					if (counterFail >= counterFailLimit) {
+						System.out.println("FAIL COUNT IS >= "
+								+ counterFailLimit + ", ENDING TEST...");
+						return true;
+					}
 				}
 				if (counter >= 500) {
 					counter = 0;
 					System.out
-							.println(failMessage
-									+ counterTotal
+							.println(counterTotal
 									+ "/"
 									+ totalRecordCount
 									+ " records processed (2/2 Publish Oracle Cit lookup in Publish MSSQL Umcg).");
@@ -544,5 +584,4 @@ public class DataTestCompareTables {
 		}
 		return fail;
 	}
-
 }
