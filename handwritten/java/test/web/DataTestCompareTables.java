@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,17 +40,15 @@ public class DataTestCompareTables {
 	Connection connOracle;
 	Statement stmtOracle;
 	ResultSet rsetOracle;
-	PreparedStatement psOracle;
 
 	Connection connMSSQL;
 	Statement stmtMSSQL;
 	ResultSet rsetMSSQL;
-	PreparedStatement psMSSQL;
 
 	Integer stid;
 	Integer counterFailLimit;
-	Integer debugRows;
-	Boolean debug;
+	Boolean debug = false;
+	Integer debugRows = 5;
 	Integer totalRecordCount = 0;
 
 	Map<String, ArrayList<String>> publishUmcgTablesColumns = new HashMap<String, ArrayList<String>>();
@@ -200,10 +199,10 @@ public class DataTestCompareTables {
 		Map<String, ArrayList<String>> notInUmcg = new HashMap<String, ArrayList<String>>();
 		// Lookup missing publishUmcgTablesColumns in publishCitTablesColumns
 		// and put the optional results in notInCit.
-		for (Map.Entry<String, ArrayList<String>> tabColsUmcg : publishUmcgTablesColumns
+		for (Map.Entry<String, ArrayList<String>> tableColumsUmcg : publishUmcgTablesColumns
 				.entrySet()) {
-			String tab = tabColsUmcg.getKey();
-			for (String col : tabColsUmcg.getValue()) {
+			String tab = tableColumsUmcg.getKey();
+			for (String col : tableColumsUmcg.getValue()) {
 				try {
 					if (publishCitTablesColumns.get(tab).contains(col) == false)
 						throw new Exception();
@@ -227,10 +226,10 @@ public class DataTestCompareTables {
 		}
 		// Lookup missing publishCitTablesColumns in publishUmcgTablesColumns
 		// and put the optional results in notInCit.
-		for (Map.Entry<String, ArrayList<String>> tabColsCit : publishCitTablesColumns
+		for (Map.Entry<String, ArrayList<String>> tableColumsCit : publishCitTablesColumns
 				.entrySet()) {
-			String tab = tabColsCit.getKey();
-			for (String col : tabColsCit.getValue()) {
+			String tab = tableColumsCit.getKey();
+			for (String col : tableColumsCit.getValue()) {
 				try {
 					if (publishUmcgTablesColumns.get(tab).contains(col) == false)
 						throw new Exception();
@@ -278,21 +277,22 @@ public class DataTestCompareTables {
 	public boolean rowCountUmcgVersusCit() throws Exception {
 		System.out.println("Starting rowcount...");
 		Boolean fail = false;
-		for (Map.Entry<String, ArrayList<String>> tabColsUmcg : publishUmcgTablesColumns
+		for (Map.Entry<String, ArrayList<String>> tableColumsUmcg : publishUmcgTablesColumns
 				.entrySet()) {
-			String sql = "select count(*) from " + tabColsUmcg.getKey();
+			String sql = "select count(*) from " + tableColumsUmcg.getKey();
 			rsetMSSQL = stmtMSSQL.executeQuery(sql);
 			rsetMSSQL.next();
 			rsetOracle = stmtOracle.executeQuery(sql);
 			rsetOracle.next();
 			if (Integer.parseInt(rsetMSSQL.getString(1)) == Integer
 					.parseInt(rsetOracle.getString(1))) {
-				System.out.println("Rowcount " + tabColsUmcg.getKey()
+				System.out.println("Rowcount " + tableColumsUmcg.getKey()
 						+ " both: '" + rsetMSSQL.getString(1) + "'.");
 			} else {
 				fail = true;
-				System.out.println("FAILED: Rowcount " + tabColsUmcg.getKey()
-						+ " CIT: " + rsetOracle.getString(1) + ", UMCG: "
+				System.out.println("FAILED: Rowcount "
+						+ tableColumsUmcg.getKey() + " CIT: "
+						+ rsetOracle.getString(1) + ", UMCG: "
 						+ rsetMSSQL.getString(1) + ".");
 
 			}
@@ -319,87 +319,38 @@ public class DataTestCompareTables {
 		Integer counterTotal = 0;
 		Integer counterFail = 0;
 		// Loop table columns
-		for (Map.Entry<String, ArrayList<String>> tabCols : publishUmcgTablesColumns
+		for (Map.Entry<String, ArrayList<String>> tableColums : publishUmcgTablesColumns
 				.entrySet()) {
-			System.out.println("Processing: " + tabCols);
+			System.out.println("Processing: " + tableColums);
 			// Select a table from UMCG publish.
-			String sql = "";
-			String selectCol = "";
-			sql += "select ";
-			if (debug)
-				sql += "top " + debugRows + " ";
-			sql += "\n";
-			for (String col : tabCols.getValue()) {
-				if (selectCol.length() == 0)
-					selectCol += "  ";
-				else
-					selectCol += "  ,";
-				selectCol += col + "\n";
-			}
-			sql += selectCol;
-			sql += "from\n";
-			sql += "  " + tabCols.getKey() + "\n";
-			rsetMSSQL = stmtMSSQL.executeQuery(sql);
+			String sqlSelectDataset = "";
+			for (String col : tableColums.getValue())
+				if (sqlSelectDataset.length() == 0) {
+					sqlSelectDataset += "select ";
+					if (debug)
+						sqlSelectDataset += "top " + debugRows + " ";
+					sqlSelectDataset += col + " ";
+				} else
+					sqlSelectDataset += ", " + col + " ";
+			sqlSelectDataset += "from " + tableColums.getKey() + " ";
+			rsetMSSQL = stmtMSSQL.executeQuery(sqlSelectDataset);
 			// Loop UMCG publish table rows.
 			while (rsetMSSQL.next()) {
 				counter++;
 				counterTotal++;
-				String whereColVal = "";
 				// Switch between parameter input or 'IS NULL'.
-				sql = "select count(*) from " + tabCols.getKey() + " where ";
-				for (String col : tabCols.getValue()) {
-					if (whereColVal.length() != 0)
-						whereColVal += "and ";
-					if (rsetMSSQL.getString(col) == null
-							|| rsetMSSQL.getString(col).isEmpty())
-						whereColVal += col + " is null ";
-					else
-						whereColVal += col + " = ? ";
-				}
-				sql += whereColVal;
-				psOracle = connOracle.prepareStatement(sql);
+				String sqlPrepareStatement = createSqlPrepareStatementOracle(
+						tableColums, rsetMSSQL);
+				PreparedStatement psOracle = connOracle
+						.prepareStatement(sqlPrepareStatement);
 				Integer psIndex = 0;
 				// Switch data types and input data.
-				for (String col : tabCols.getValue()) {
+				for (String col : tableColums.getValue()) {
 					if (!(rsetMSSQL.getString(col) == null || rsetMSSQL
 							.getString(col).isEmpty())) {
 						psIndex++;
-						String datatype = rsetMSSQL.getMetaData()
-								.getColumnTypeName(rsetMSSQL.findColumn(col));
-						if (datatype == "int")
-							psOracle.setInt(psIndex, rsetMSSQL.getInt(col));
-						else if (datatype == "smallint")
-							psOracle.setShort(psIndex, rsetMSSQL.getShort(col));
-						else if (datatype == "tinyint")
-							psOracle.setShort(psIndex, rsetMSSQL.getShort(col));
-						else if (datatype == "numeric")
-							psOracle.setBigDecimal(psIndex,
-									rsetMSSQL.getBigDecimal(col));
-						else if (datatype == "decimal")
-							psOracle.setBigDecimal(psIndex,
-									rsetMSSQL.getBigDecimal(col));
-						else if (datatype == "datetime")
-							psOracle.setTimestamp(psIndex,
-									rsetMSSQL.getTimestamp(col));
-						else if (datatype == "varchar")
-							psOracle.setString(psIndex,
-									rsetMSSQL.getString(col));
-						else if (datatype == "nvarchar")
-							psOracle.setString(psIndex,
-									rsetMSSQL.getString(col));
-						else if (datatype == "uniqueidentifier")
-							psOracle.setString(psIndex,
-									"{" + rsetMSSQL.getString(col) + "}");
-						else if (datatype == "bigint")
-							psOracle.setLong(psIndex, rsetMSSQL.getLong(col));
-						else {
-							psOracle.setString(psIndex,
-									rsetMSSQL.getString(col));
-							System.out
-									.println("DATATYPE CONVERSION FOR '"
-											+ datatype
-											+ "' MUST BE ADDED TO THIS TEST");
-						}
+						psOracle = createPreparedStatement(rsetMSSQL, psOracle,
+								sqlPrepareStatement, col, psIndex);
 					}
 				}
 				// Lookup row in CIT Publish.
@@ -417,23 +368,41 @@ public class DataTestCompareTables {
 				}
 				if (rows > 1) {
 					// Investigate duplicate rows.
+					String sqlPsInvestigate = createSqlPrepareStatementMSSQL(
+							tableColums, rsetMSSQL);
+					PreparedStatement psInvestigate = connMSSQL
+							.prepareStatement(sqlPsInvestigate);
+					psIndex = 0;
+					for (String col : tableColums.getValue()) {
+						if (rsetMSSQL.getString(col) != null) {
+							psIndex++;
+							psInvestigate = createPreparedStatement(rsetMSSQL,
+									psInvestigate, sqlPrepareStatement, col,
+									psIndex);
+						}
+					}
+					ResultSet rsetOracleInvestigate = psInvestigate
+							.executeQuery();
+					rsetOracleInvestigate.next();
+					Integer rowsInvestigate = rsetOracleInvestigate.getInt(1);
+					rsetOracleInvestigate.close();
+					psInvestigate.close();
+					if (rowsInvestigate != rows) {
+						fail = true;
+						failCurrentRow = true;
+						counterFail++;
+						// Reconstruction for user output.
+						System.out
+								.println("FAILED: This duplicate row has a different rowcount in Publish Oracle Umcg than in Publish MSSQL CIT: "
+										+ sqlReconstruction(tableColums,
+												rsetMSSQL));
+					}
 				}
 				if (failCurrentRow) {
 					// Reconstruction for user output.
-					sql = "select * from " + tabCols.getKey() + " where ";
-					whereColVal = "";
-					for (String col : tabCols.getValue()) {
-						if (whereColVal.length() != 0)
-							whereColVal += "and ";
-						if (rsetMSSQL.getString(col) == null)
-							whereColVal += col + " is null ";
-						else
-							whereColVal += col + " = '"
-									+ rsetMSSQL.getString(col) + "' ";
-					}
-					sql += whereColVal;
 					System.out.println("FAILED:"
-							+ " lookup in Publish Oracle CIT: " + sql);
+							+ " lookup in Publish Oracle CIT: "
+							+ sqlReconstruction(tableColums, rsetMSSQL));
 					if (counterFail >= counterFailLimit) {
 						System.out.println("FAILED: FAIL COUNT IS >= "
 								+ counterFailLimit + ", ENDING TEST...");
@@ -470,67 +439,32 @@ public class DataTestCompareTables {
 		Integer counter = 0;
 		Integer counterTotal = 0;
 		Integer counterFail = 0;
-		for (Map.Entry<String, ArrayList<String>> tabCols : publishCitTablesColumns
+		for (Map.Entry<String, ArrayList<String>> tableColums : publishCitTablesColumns
 				.entrySet()) {
-			System.out.println("Processing: " + tabCols);
-			String sql = "";
-			String selectCol = "";
-			sql += "select\n";
-			for (String col : tabCols.getValue()) {
-				if (selectCol.length() == 0)
-					selectCol += "  ";
+			System.out.println("Processing: " + tableColums);
+			String sqlSelectDataset = "";
+			for (String col : tableColums.getValue())
+				if (sqlSelectDataset.length() == 0)
+					sqlSelectDataset = "select " + col + " ";
 				else
-					selectCol += "  ,";
-				selectCol += col + "\n";
-			}
-			sql += selectCol;
-			sql += "from\n";
-			sql += "  " + tabCols.getKey() + "\n";
+					sqlSelectDataset += ", " + col + " ";
+			sqlSelectDataset += "from " + tableColums.getKey() + " ";
 			if (debug)
-				sql += "where rownum <= " + debugRows + " ";
-			rsetOracle = stmtOracle.executeQuery(sql);
+				sqlSelectDataset += "where rownum <= " + debugRows + " ";
+			rsetOracle = stmtOracle.executeQuery(sqlSelectDataset);
 			while (rsetOracle.next()) {
 				counter++;
 				counterTotal++;
-				String whereColVal = "";
-				sql = "select count(*) from " + tabCols.getKey() + " where ";
-				for (String col : tabCols.getValue()) {
-					if (whereColVal.length() != 0)
-						whereColVal += "and ";
-					if (rsetOracle.getString(col) == null)
-						whereColVal += "(" + col + " is null or len(" + col
-								+ ") = 0) ";
-					else
-						whereColVal += col + " = ? ";
-				}
-				sql += whereColVal;
-				psMSSQL = connMSSQL.prepareStatement(sql);
+				String sqlPrepareStatement = createSqlPrepareStatementMSSQL(
+						tableColums, rsetOracle);
+				PreparedStatement psMSSQL = connMSSQL
+						.prepareStatement(sqlPrepareStatement);
 				Integer psIndex = 0;
-				for (String col : tabCols.getValue()) {
+				for (String col : tableColums.getValue()) {
 					if (rsetOracle.getString(col) != null) {
 						psIndex++;
-						String datatype = rsetOracle.getMetaData()
-								.getColumnTypeName(rsetOracle.findColumn(col));
-						if (datatype == "NUMBER")
-							psMSSQL.setBigDecimal(psIndex,
-									rsetOracle.getBigDecimal(col));
-						else if (datatype == "DATE")
-							psMSSQL.setTimestamp(psIndex,
-									rsetOracle.getTimestamp(col));
-						else if (datatype == "VARCHAR2")
-							psMSSQL.setString(psIndex,
-									rsetOracle.getString(col));
-						else if (datatype == "NVARCHAR2")
-							psMSSQL.setString(psIndex,
-									rsetOracle.getString(col));
-						else {
-							psMSSQL.setString(psIndex,
-									rsetOracle.getString(col));
-							System.out
-									.println("DATATYPE CONVERSION FOR'"
-											+ datatype
-											+ "' MUST BE ADDED TO THIS TEST");
-						}
+						psMSSQL = createPreparedStatement(rsetOracle, psMSSQL,
+								sqlPrepareStatement, col, psIndex);
 					}
 				}
 				rsetMSSQL = psMSSQL.executeQuery();
@@ -543,28 +477,43 @@ public class DataTestCompareTables {
 					fail = true;
 					failCurrentRow = true;
 					counterFail++;
+					// Reconstruction for user output.
+					System.out.println("FAILED: lookup in Publish MSSQL Umcg: "
+							+ sqlReconstruction(tableColums, rsetOracle));
 				}
 				if (rows > 1) {
 					// Investigate duplicate rows.
+					String sqlPsInvestigate = createSqlPrepareStatementOracle(
+							tableColums, rsetOracle);
+					PreparedStatement psInvestigate = connOracle
+							.prepareStatement(sqlPsInvestigate);
+					psIndex = 0;
+					for (String col : tableColums.getValue()) {
+						if (rsetOracle.getString(col) != null) {
+							psIndex++;
+							psInvestigate = createPreparedStatement(rsetOracle,
+									psInvestigate, sqlPrepareStatement, col,
+									psIndex);
+						}
+					}
+					ResultSet rsetMSSQLInvestigate = psInvestigate
+							.executeQuery();
+					rsetMSSQLInvestigate.next();
+					Integer rowsInvestigate = rsetMSSQLInvestigate.getInt(1);
+					rsetMSSQLInvestigate.close();
+					psInvestigate.close();
+					if (rowsInvestigate != rows) {
+						fail = true;
+						failCurrentRow = true;
+						counterFail++;
+						// Reconstruction for user output.
+						System.out
+								.println("FAILED: This duplicate row has a different rowcount in Publish MSSQL Umcg than in Publish Oracle CIT: "
+										+ sqlReconstruction(tableColums,
+												rsetOracle));
+					}
 				}
 				if (failCurrentRow) {
-					// Reconstruction for user output.
-					sql = "select * from " + tabCols.getKey() + " where ";
-					whereColVal = "";
-					for (String col : tabCols.getValue()) {
-						if (whereColVal.length() != 0)
-							whereColVal += "and ";
-						whereColVal += col + " ";
-						if (rsetOracle.getString(col) == null)
-							whereColVal += "(" + col + " is null or len(" + col
-									+ ") = 0) ";
-						else
-							whereColVal += " = '" + rsetOracle.getString(col)
-									+ "' ";
-					}
-					sql += whereColVal;
-					System.out.println("FAILED: lookup in Publish MSSQL Umcg: "
-							+ sql);
 					if (counterFail >= counterFailLimit) {
 						System.out.println("FAIL COUNT IS >= "
 								+ counterFailLimit + ", ENDING TEST...");
@@ -584,4 +533,90 @@ public class DataTestCompareTables {
 		}
 		return fail;
 	}
+
+	public String createSqlPrepareStatementOracle(
+			Map.Entry<String, ArrayList<String>> tableColums, ResultSet rset)
+			throws SQLException {
+		String sqlPrepareStatement = "";
+		for (String col : tableColums.getValue()) {
+			if (sqlPrepareStatement.length() == 0)
+				sqlPrepareStatement = "select count(*) from "
+						+ tableColums.getKey() + " where ";
+			else
+				sqlPrepareStatement += "and ";
+			if (rset.getString(col) == null || rset.getString(col).isEmpty())
+				sqlPrepareStatement += col + " is null ";
+			else
+				sqlPrepareStatement += col + " = ? ";
+		}
+		return sqlPrepareStatement;
+	}
+
+	public String createSqlPrepareStatementMSSQL(
+			Map.Entry<String, ArrayList<String>> tableColums, ResultSet rset)
+			throws SQLException {
+		String sqlPrepareStatement = "";
+		for (String col : tableColums.getValue()) {
+			if (sqlPrepareStatement.length() == 0)
+				sqlPrepareStatement = "select count(*) from "
+						+ tableColums.getKey() + " where ";
+			else
+				sqlPrepareStatement += "and ";
+			if (rset.getString(col) == null)
+				sqlPrepareStatement += "(" + col + " is null or len(" + col
+						+ ") = 0) ";
+			else
+				sqlPrepareStatement += col + " = ? ";
+		}
+		return sqlPrepareStatement;
+	}
+
+	public PreparedStatement createPreparedStatement(ResultSet rset,
+			PreparedStatement ps, String sql, String col, Integer psIndex)
+			throws Exception {
+		String datatype = rset.getMetaData().getColumnTypeName(
+				rset.findColumn(col));
+		if (datatype == "NUMBER" || datatype == "numeric"
+				|| datatype == "decimal")
+			ps.setBigDecimal(psIndex, rset.getBigDecimal(col));
+		else if (datatype == "DATE" || datatype == "datetime")
+			ps.setTimestamp(psIndex, rset.getTimestamp(col));
+		else if (datatype == "VARCHAR2" || datatype == "NVARCHAR2"
+				|| datatype == "varchar" || datatype == "nvarchar")
+			ps.setString(psIndex, rset.getString(col));
+		else if (datatype == "int")
+			ps.setInt(psIndex, rsetMSSQL.getInt(col));
+		else if (datatype == "tinyint" || datatype == "smallint")
+			ps.setShort(psIndex, rsetMSSQL.getShort(col));
+		else if (datatype == "uniqueidentifier")
+			ps.setString(psIndex, "{" + rsetMSSQL.getString(col) + "}");
+		else if (datatype == "bigint")
+			ps.setLong(psIndex, rsetMSSQL.getLong(col));
+		else {
+			ps.setString(psIndex, rset.getString(col));
+			System.out.println("DATATYPE CONVERSION FOR'" + datatype
+					+ "' MUST BE ADDED TO THIS TEST");
+		}
+		return ps;
+	}
+
+	public String sqlReconstruction(
+			Map.Entry<String, ArrayList<String>> tableColums, ResultSet rset)
+			throws SQLException {
+		String sqlReconstruction = "";
+		for (String col : tableColums.getValue()) {
+			if (sqlReconstruction.length() == 0)
+				sqlReconstruction = "select * from " + tableColums.getKey()
+						+ " where " + col + " ";
+			else
+				sqlReconstruction += "and " + col + " ";
+			if (rset.getString(col) == null)
+				sqlReconstruction += "(" + col + " is null or len(" + col
+						+ ") = 0) ";
+			else
+				sqlReconstruction += " = '" + rset.getString(col) + "' ";
+		}
+		return sqlReconstruction;
+	}
+
 }
