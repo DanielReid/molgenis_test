@@ -29,6 +29,7 @@ public class DataTestPublishStage {
 	ResultSet rset1;
 	ResultSet rset2;
 
+	Integer counterFailLimit;
 	Integer stid;
 	Integer totalRecordCount = 0;
 
@@ -162,20 +163,16 @@ public class DataTestPublishStage {
 				counter++;
 				counterTotal++;
 				String whereColVal = "";
-				sql = "";
-				sql += "select ";
-				sql += "count(*) ";
-				sql += "from ";
-				sql += tabCols.getKey() + " ";
-				sql += "where ";
+				sql = "select count(*) from " + tabCols.getKey() + " where ";
 				for (String col : tabCols.getValue()) {
 					if (whereColVal.length() != 0)
 						whereColVal += "and ";
-					whereColVal += col;
 					if (rset1.getString(col) == null)
-						whereColVal += " IS NULL ";
+						whereColVal += "(" + col + " IS NULL or len(" + col
+								+ ") = 0)";
 					else
-						whereColVal += " = '" + rset1.getString(col) + "' ";
+						whereColVal += col + " = '" + rset1.getString(col)
+								+ "' ";
 				}
 				sql += whereColVal;
 				rset2 = stmt2.executeQuery(sql);
@@ -185,9 +182,9 @@ public class DataTestPublishStage {
 					fail = true;
 					failMessage = "PREVIOUSLY FAILED: ";
 					counterFail++;
-					if (counterFail >= 100)
-					{
-						System.out.println("FAIL COUNT IS >= 100, ENDING TEST...");
+					if (counterFail >= counterFailLimit) {
+						System.out.println("FAIL COUNT IS >= "
+								+ counterFailLimit + ", ENDING TEST...");
 						return true;
 					}
 				}
