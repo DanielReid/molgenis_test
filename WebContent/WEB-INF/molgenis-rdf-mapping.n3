@@ -20,10 +20,10 @@
 
 # Should be jndi loaded!
 map:database a d2rq:Database;
-	d2rq:jdbcDriver "com.mysql.jdbc.Driver";
-	d2rq:jdbcDSN "jdbc:mysql://localhost/molgenis_test";
+	d2rq:jdbcDriver "oracle.jdbc.driver.OracleDriver";
+	d2rq:jdbcDSN "jdbc:oracle:thin:@//localhost:2000/llptest";
 	d2rq:username "molgenis";
-	d2rq:password "molgenis";
+	d2rq:password "molTagtGen24Ora";
 	jdbc:autoReconnect "true";
 	jdbc:zeroDateTimeBehavior "convertToNull";
 	.
@@ -82,6 +82,61 @@ map:VarcharEntity_defaultVarchar a d2rq:PropertyBridge;
 	d2rq:column "VarcharEntity.defaultVarchar";
 	d2rq:datatype xsd:string;
 	.
+# Entity OtherVarcharEntity
+map:OtherVarcharEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "OtherVarcharEntity/@@OtherVarcharEntity.id@@";
+	d2rq:class vocab:OtherVarcharEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for OtherVarcharEntity using primary key
+map:OtherVarcharEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:OtherVarcharEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "OtherVarcharEntity #@@OtherVarcharEntity.id@@";
+	.
+map:OtherVarcharEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:OtherVarcharEntity;
+	d2rq:property vocab:OtherVarcharEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "OtherVarcharEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:OtherVarcharEntity_normalVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:OtherVarcharEntity;
+	d2rq:property vocab:OtherVarcharEntity_normalVarchar;
+	d2rq:propertyDefinitionLabel "Normal Varchar";
+	d2rq:propertyDefinitionComment "Normal Varchar";
+	d2rq:column "OtherVarcharEntity.normalVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:OtherVarcharEntity_readonlyVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:OtherVarcharEntity;
+	d2rq:property vocab:OtherVarcharEntity_readonlyVarchar;
+	d2rq:propertyDefinitionLabel "Readonly Varchar";
+	d2rq:propertyDefinitionComment "Readonly Varchar";
+	d2rq:column "OtherVarcharEntity.readonlyVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:OtherVarcharEntity_nillableVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:OtherVarcharEntity;
+	d2rq:property vocab:OtherVarcharEntity_nillableVarchar;
+	d2rq:propertyDefinitionLabel "Nillable Varchar";
+	d2rq:propertyDefinitionComment "Nillable Varchar";
+	d2rq:column "OtherVarcharEntity.nillableVarchar";
+	d2rq:datatype xsd:string;
+	.
+map:OtherVarcharEntity_defaultVarchar a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:OtherVarcharEntity;
+	d2rq:property vocab:OtherVarcharEntity_defaultVarchar;
+	d2rq:propertyDefinitionLabel "Defaulted Varchar";
+	d2rq:propertyDefinitionComment "Defaulted Varchar";
+	d2rq:column "OtherVarcharEntity.defaultVarchar";
+	d2rq:datatype xsd:string;
+	.
 # Entity XrefEntity
 map:XrefEntity a d2rq:ClassMap;
 	d2rq:dataStorage map:database;
@@ -126,8 +181,8 @@ map:XrefEntity_nillableXref a d2rq:PropertyBridge;
 	d2rq:property vocab:XrefEntity_nillableXref;
 	d2rq:propertyDefinitionLabel "Nillable Xref";
 	d2rq:propertyDefinitionComment "Nillable Xref";
-	d2rq:refersToClassMap map:VarcharEntity;
-	d2rq:join "XrefEntity.nillableXref => VarcharEntity.id";
+	d2rq:refersToClassMap map:OtherVarcharEntity;
+	d2rq:join "XrefEntity.nillableXref => OtherVarcharEntity.id";
 	.
 # Entity TreeEntity
 map:TreeEntity a d2rq:ClassMap;
@@ -727,6 +782,116 @@ map:TextEntity_defaultText a d2rq:PropertyBridge;
 	d2rq:propertyDefinitionLabel "Defaulted Text";
 	d2rq:propertyDefinitionComment "Defaulted Text";
 	d2rq:column "TextEntity.defaultText";
+	d2rq:datatype xsd:text;
+	.
+# Entity RichtextEntity
+map:RichtextEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "RichtextEntity/@@RichtextEntity.id@@";
+	d2rq:class vocab:RichtextEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for RichtextEntity using primary key
+map:RichtextEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:RichtextEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "RichtextEntity #@@RichtextEntity.id@@";
+	.
+map:RichtextEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:RichtextEntity;
+	d2rq:property vocab:RichtextEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "RichtextEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:RichtextEntity_normalText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:RichtextEntity;
+	d2rq:property vocab:RichtextEntity_normalText;
+	d2rq:propertyDefinitionLabel "Normal Text";
+	d2rq:propertyDefinitionComment "Normal Text";
+	d2rq:column "RichtextEntity.normalText";
+	d2rq:datatype xsd:text;
+	.
+map:RichtextEntity_readonlyText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:RichtextEntity;
+	d2rq:property vocab:RichtextEntity_readonlyText;
+	d2rq:propertyDefinitionLabel "Readonly Text";
+	d2rq:propertyDefinitionComment "Readonly Text";
+	d2rq:column "RichtextEntity.readonlyText";
+	d2rq:datatype xsd:text;
+	.
+map:RichtextEntity_nillableText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:RichtextEntity;
+	d2rq:property vocab:RichtextEntity_nillableText;
+	d2rq:propertyDefinitionLabel "Nillable Text";
+	d2rq:propertyDefinitionComment "Nillable Text";
+	d2rq:column "RichtextEntity.nillableText";
+	d2rq:datatype xsd:text;
+	.
+map:RichtextEntity_defaultText a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:RichtextEntity;
+	d2rq:property vocab:RichtextEntity_defaultText;
+	d2rq:propertyDefinitionLabel "Defaulted Text";
+	d2rq:propertyDefinitionComment "Defaulted Text";
+	d2rq:column "RichtextEntity.defaultText";
+	d2rq:datatype xsd:text;
+	.
+# Entity FreemarkerEntity
+map:FreemarkerEntity a d2rq:ClassMap;
+	d2rq:dataStorage map:database;
+	d2rq:uriPattern "FreemarkerEntity/@@FreemarkerEntity.id@@";
+	d2rq:class vocab:FreemarkerEntity;
+	d2rq:classDefinitionLabel "";
+	d2rq:classDefinitionComment "";
+	.	
+# todo: use the xref labels if they are complete
+# label for FreemarkerEntity using primary key
+map:FreemarkerEntity__label a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FreemarkerEntity;
+	d2rq:property rdfs:label;
+	d2rq:pattern "FreemarkerEntity #@@FreemarkerEntity.id@@";
+	.
+map:FreemarkerEntity_id a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FreemarkerEntity;
+	d2rq:property vocab:FreemarkerEntity_id;
+	d2rq:propertyDefinitionLabel "id";
+	d2rq:propertyDefinitionComment "id";
+	d2rq:column "FreemarkerEntity.id";
+	d2rq:datatype xsd:int;
+	.
+map:FreemarkerEntity_normalFreemarker a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FreemarkerEntity;
+	d2rq:property vocab:FreemarkerEntity_normalFreemarker;
+	d2rq:propertyDefinitionLabel "Normal Freemarker";
+	d2rq:propertyDefinitionComment "Normal Freemarker";
+	d2rq:column "FreemarkerEntity.normalFreemarker";
+	d2rq:datatype xsd:text;
+	.
+map:FreemarkerEntity_readonlyFreemarker a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FreemarkerEntity;
+	d2rq:property vocab:FreemarkerEntity_readonlyFreemarker;
+	d2rq:propertyDefinitionLabel "Readonly Freemarker";
+	d2rq:propertyDefinitionComment "Readonly Freemarker";
+	d2rq:column "FreemarkerEntity.readonlyFreemarker";
+	d2rq:datatype xsd:text;
+	.
+map:FreemarkerEntity_nillableFreemarker a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FreemarkerEntity;
+	d2rq:property vocab:FreemarkerEntity_nillableFreemarker;
+	d2rq:propertyDefinitionLabel "Nillable Freemarker";
+	d2rq:propertyDefinitionComment "Nillable Freemarker";
+	d2rq:column "FreemarkerEntity.nillableFreemarker";
+	d2rq:datatype xsd:text;
+	.
+map:FreemarkerEntity_defaultFreemarker a d2rq:PropertyBridge;
+	d2rq:belongsToClassMap map:FreemarkerEntity;
+	d2rq:property vocab:FreemarkerEntity_defaultFreemarker;
+	d2rq:propertyDefinitionLabel "Defaulted Freemarker";
+	d2rq:propertyDefinitionComment "Defaulted Freemarker";
+	d2rq:column "FreemarkerEntity.defaultFreemarker";
 	d2rq:datatype xsd:text;
 	.
 # Entity ClassA

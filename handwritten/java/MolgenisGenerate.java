@@ -1,4 +1,5 @@
 import org.molgenis.Molgenis;
+import org.molgenis.generators.sql.OracleCreateSubclassPerTableGen;
 
 
 /**
@@ -8,6 +9,7 @@ public class MolgenisGenerate
 {
 	public static void main(String[] args) throws Exception
 	{
+		//new Molgenis("molgenis.properties", OracleCreateSubclassPerTableGen.class).generate();
 		new Molgenis("molgenis.properties").generate();
 	}
 }

@@ -5,9 +5,9 @@
 		factory="org.apache.commons.dbcp.BasicDataSourceFactory" 
 		type="javax.sql.DataSource" 
 		username="molgenis"
-		password="molgenis" 
-		driverClassName="com.mysql.jdbc.Driver" 
-		url="jdbc:mysql://localhost/molgenis_test" 
+		password="molTagtGen24Ora" 
+		driverClassName="oracle.jdbc.driver.OracleDriver" 
+		url="jdbc:oracle:thin:@//localhost:2000/llptest" 
 		removeAbandoned="true"
 		maxActive="8" 
 		maxIdle="4"/>		
