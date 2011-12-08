@@ -607,7 +607,7 @@ public class DataTestCompareTables {
 		for (String col : tableColums.getValue()) {
 			if (sqlReconstruction.length() == 0)
 				sqlReconstruction = "select * from " + tableColums.getKey()
-						+ " where " + col + " ";
+						+ " where ";
 			else
 				sqlReconstruction += "and ";
 			if (rset.getString(col) == null)
