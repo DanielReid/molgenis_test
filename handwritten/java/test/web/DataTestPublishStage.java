@@ -2,9 +2,12 @@ package test.web;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -13,85 +16,89 @@ public class DataTestPublishStage {
 
 	String studie;
 
-	String dbDriver1;
-	String dbUrl1;
-	String dbUsername1;
-	String dbPassword1;
+	String dbDriverOracle;
+	String dbUrlOracle;
+	String dbUsernameOracle;
+	String dbPasswordOracle;
 
-	String dbDriver2;
-	String dbUrl2;
+	String dbDriverMSSQL;
+	String dbUrlMSSQL;
 
 	String[] excludedTables;
 	String[] excludedColumns;
 
-	Statement stmt1;
-	Statement stmt2;
-	ResultSet rset1;
-	ResultSet rset2;
+	Connection connOracle;
+	Statement stmtOracle;
+	ResultSet rsetOracle;
+
+	Connection connMSSQL;
+	Statement stmtMSSQL;
+	ResultSet rsetMSSQL;
+
 
 	Integer counterFailLimit;
-	Integer stid;
 	Integer totalRecordCount = 0;
+	Boolean debug = false;
+	Integer debugRows = 5;
 
 	Map<String, ArrayList<String>> publishTablesColumns = new HashMap<String, ArrayList<String>>();
 
 	public void init() {
 		Locale.setDefault(Locale.US);
 		try {
-			Class.forName(dbDriver1);
-			Connection conn = DriverManager.getConnection(dbUrl1, dbUsername1,
-					dbPassword1);
-			stmt1 = conn.createStatement();
+			Class.forName(dbDriverOracle);
+			connOracle = DriverManager.getConnection(dbUrlOracle,
+					dbUsernameOracle, dbPasswordOracle);
+			stmtOracle = connOracle.createStatement();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 		try {
-			Class.forName(dbDriver2);
-			Connection conn = DriverManager.getConnection(dbUrl2);
-			stmt2 = conn.createStatement();
+			Class.forName(dbDriverMSSQL);
+			connMSSQL = DriverManager.getConnection(dbUrlMSSQL);
+			stmtMSSQL = connMSSQL.createStatement();
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+		// Print out excluded table and columns for the test log.
+		if (excludedTables.length != 0)
+			System.out.println("WARNING EXCLUDED TABLES: "
+					+ Arrays.toString(excludedTables));
+		if (excludedColumns.length != 0)
+			System.out.println("WARNING EXCLUDED COLUMNS: "
+					+ Arrays.toString(excludedColumns));
 	}
 
 	public void getPublishTablesColumns() throws Exception {
 		System.out
 				.println("Getting all the related tables form publ_dict_studie...");
-		String sql = "";
-		sql += "select\n";
-		sql += "  0, tabnaam, veld\n";
-		sql += "from\n";
-		sql += "  vw_dict\n";
-		sql += "  group by tabnaam, veld";
-		rset1 = stmt1.executeQuery(sql);
-		while (rset1.next()) {
+		String sql = "select tabnaam, veld from vw_dict group by tabnaam, veld";
+		rsetOracle = stmtOracle.executeQuery(sql);
+		while (rsetOracle.next()) {
 			Boolean TableOrColumnNotExcluded = true;
 			for (int i = 0; i < excludedTables.length; i++) {
-				if (excludedTables[i].equals(rset1.getString(2)))
+				if (excludedTables[i].equals(rsetOracle.getString(1)))
 					TableOrColumnNotExcluded = false;
 			}
 			for (int i = 0; i < excludedColumns.length; i++) {
-				if (excludedColumns[i].equals(rset1.getString(3)))
+				if (excludedColumns[i].equals(rsetOracle.getString(2)))
 					TableOrColumnNotExcluded = false;
 			}
 			if (TableOrColumnNotExcluded) {
-				stid = Integer.parseInt(rset1.getString(1));
-				if (publishTablesColumns.get(rset1.getString(2)) == null) {
+				if (publishTablesColumns.get(rsetOracle.getString(1)) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns.add(rset1.getString(3));
-					publishTablesColumns.put(rset1.getString(2), dbColumns);
+					dbColumns.add(rsetOracle.getString(2));
+					publishTablesColumns
+							.put(rsetOracle.getString(1), dbColumns);
 				} else {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns = publishTablesColumns.get(rset1.getString(2));
-					if (dbColumns.contains(rset1.getString(3)) == false)
-						dbColumns.add(rset1.getString(3));
-					publishTablesColumns.put(rset1.getString(2), dbColumns);
+					dbColumns = publishTablesColumns.get(rsetOracle
+							.getString(1));
+					if (dbColumns.contains(rsetOracle.getString(2)) == false)
+						dbColumns.add(rsetOracle.getString(2));
+					publishTablesColumns
+							.put(rsetOracle.getString(1), dbColumns);
 				}
-			} else {
-				System.out
-						.println("\tWARNING: ignoring table: "
-								+ rset1.getString(2) + " column: "
-								+ rset1.getString(3));
 			}
 		}
 	}
@@ -99,10 +106,10 @@ public class DataTestPublishStage {
 	public void getTotalRecordCount() throws Exception {
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
-			rset1 = stmt1.executeQuery("select count(*) from "
+			rsetOracle = stmtOracle.executeQuery("select count(*) from "
 					+ tabCols.getKey());
-			rset1.next();
-			totalRecordCount += Integer.parseInt(rset1.getString(1));
+			rsetOracle.next();
+			totalRecordCount += Integer.parseInt(rsetOracle.getString(1));
 		}
 	}
 
@@ -110,30 +117,56 @@ public class DataTestPublishStage {
 		System.out
 				.println("Starting table and column lookup in the Stage database...");
 		Boolean fail = false;
+		Map<String, ArrayList<String>> notInStage = new HashMap<String, ArrayList<String>>();
+		Map<String, ArrayList<String>> foundInStage = new HashMap<String, ArrayList<String>>();
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
 			for (String col : tabCols.getValue()) {
-				String sql = "";
-				sql += "select \n";
-				sql += "  count(*) \n";
-				sql += "from \n";
-				sql += "  INFORMATION_SCHEMA.COLUMNS \n";
-				sql += "where \n";
-				sql += "  TABLE_NAME = '" + tabCols.getKey() + "' \n";
-				sql += "  and COLUMN_NAME = '" + col + "' \n";
-				rset2 = stmt2.executeQuery(sql);
-				rset2.next();
-				if (Integer.parseInt(rset2.getString(1)) == 1) {
-					System.out.println("\tFound table: " + tabCols.getKey()
-							+ " column: " + col);
+				String sql = "select count(*) from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME = '"
+						+ tabCols.getKey()
+						+ "' and COLUMN_NAME = '"
+						+ col
+						+ "'";
+				rsetMSSQL = stmtMSSQL.executeQuery(sql);
+				rsetMSSQL.next();
+				if (Integer.parseInt(rsetMSSQL.getString(1)) == 1) {
+					if (foundInStage.get(tabCols.getKey()) == null) {
+						ArrayList<String> dbColumns = new ArrayList<String>();
+						dbColumns.add(col);
+						foundInStage.put(tabCols.getKey(), dbColumns);
+					} else {
+						ArrayList<String> dbColumns = new ArrayList<String>();
+						dbColumns = foundInStage.get(tabCols.getKey());
+						if (dbColumns.contains(col) == false)
+							dbColumns.add(col);
+						foundInStage.put(tabCols.getKey(), dbColumns);
+					}
 				} else {
-					System.out.println("\tFAILED: Not found table: "
-							+ tabCols.getKey() + " column: " + col);
 					fail = true;
+					if (notInStage.get(tabCols.getKey()) == null) {
+						ArrayList<String> dbColumns = new ArrayList<String>();
+						dbColumns.add(col);
+						notInStage.put(tabCols.getKey(), dbColumns);
+					} else {
+						ArrayList<String> dbColumns = new ArrayList<String>();
+						dbColumns = notInStage.get(tabCols.getKey());
+						if (dbColumns.contains(col) == false)
+							dbColumns.add(col);
+						notInStage.put(tabCols.getKey(), dbColumns);
+					}
 				}
+
 			}
 		}
+		if (fail)
+			System.out
+					.println("FAILED: Not found in Stage database MSSQL UMCG: "
+							+ notInStage);
+		else
+			System.out.println("SUCCESS table column selection: "
+					+ foundInStage);
 		return fail;
+
 	}
 
 	public Boolean compareData() throws Exception {
@@ -145,39 +178,35 @@ public class DataTestPublishStage {
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
 			System.out.println("Starting with: " + tabCols);
-			String sql = "";
-			String selectCol = "";
-			sql += "select\n";
-			for (String col : tabCols.getValue()) {
-				if (selectCol.length() == 0)
-					selectCol += "  ";
+			String sqlSelectDataset = "";
+			for (String col : tabCols.getValue())
+				if (sqlSelectDataset.length() == 0)
+					sqlSelectDataset = "select " + col + " ";
 				else
-					selectCol += "  ,";
-				selectCol += col + "\n";
-			}
-			sql += selectCol;
-			sql += "from\n";
-			sql += "  " + tabCols.getKey() + "\n";
-			rset1 = stmt1.executeQuery(sql);
-			while (rset1.next()) {
+					sqlSelectDataset += ", " + col + " ";
+			sqlSelectDataset += "from " + tabCols.getKey() + " ";
+			rsetOracle = stmtOracle.executeQuery(sqlSelectDataset);
+			while (rsetOracle.next()) {
 				counter++;
 				counterTotal++;
-				String whereColVal = "";
-				sql = "select count(*) from " + tabCols.getKey() + " where ";
+				String sql = "";
 				for (String col : tabCols.getValue()) {
-					if (whereColVal.length() != 0)
-						whereColVal += "and ";
-					if (rset1.getString(col) == null)
-						whereColVal += "(" + col + " IS NULL or len(" + col
-								+ ") = 0)";
+					if (sql.length() == 0)
+						sql = "select count(*) from " + tabCols.getKey()
+								+ " where ";
 					else
-						whereColVal += col + " = '" + rset1.getString(col)
-								+ "' ";
+						sql += "and ";
+					if (rsetOracle.getString(col) == null)
+						sql += "(" + col + " IS NULL or len(" + col + ") = 0) ";
+					else
+						sql += col + " = '" + rsetOracle.getString(col) + "' ";
 				}
-				sql += whereColVal;
-				rset2 = stmt2.executeQuery(sql);
-				rset2.next();
-				if (rset2.getString(1).equals("0")) {
+
+				System.out.println(sql);
+
+				rsetMSSQL = stmtMSSQL.executeQuery(sql);
+				rsetMSSQL.next();
+				if (rsetMSSQL.getString(1).equals("0")) {
 					System.out.println("FAILED: " + sql);
 					fail = true;
 					failMessage = "PREVIOUSLY FAILED: ";
@@ -193,11 +222,199 @@ public class DataTestPublishStage {
 					System.out.println(failMessage + counterTotal + "/"
 							+ totalRecordCount + " records processed.");
 				}
-				rset2.close();
+				rsetMSSQL.close();
 			}
-			rset1.close();
+			rsetOracle.close();
 		}
 		return fail;
 	}
+	
+	
+	public boolean lookupPublishStage() throws Exception {
+		System.out
+				.println("Starting with Publish lookup in Stage.");
+		Boolean fail = false;
+		Integer counter = 0;
+		Integer counterTotal = 0;
+		Integer counterFail = 0;
+		for (Map.Entry<String, ArrayList<String>> tableColums : publishTablesColumns
+				.entrySet()) {
+			System.out.println("Processing: " + tableColums);
+			String sqlSelectDataset = "";
+			for (String col : tableColums.getValue())
+				if (sqlSelectDataset.length() == 0)
+					sqlSelectDataset = "select " + col + " ";
+				else
+					sqlSelectDataset += ", " + col + " ";
+			sqlSelectDataset += "from " + tableColums.getKey() + " ";
+			if (debug)
+				sqlSelectDataset += "where rownum <= " + debugRows + " ";
+			rsetOracle = stmtOracle.executeQuery(sqlSelectDataset);
+			while (rsetOracle.next()) {
+				counter++;
+				counterTotal++;
+				String sqlPrepareStatement = createSqlPrepareStatementMSSQL(
+						tableColums, rsetOracle);
+				PreparedStatement psMSSQL = connMSSQL
+						.prepareStatement(sqlPrepareStatement);
+				Integer psIndex = 0;
+				for (String col : tableColums.getValue()) {
+					if (rsetOracle.getString(col) != null) {
+						psIndex++;
+						psMSSQL = createPreparedStatement(rsetOracle, psMSSQL,
+								sqlPrepareStatement, col, psIndex);
+					}
+				}
+				rsetMSSQL = psMSSQL.executeQuery();
+				rsetMSSQL.next();
+				Integer rows = rsetMSSQL.getInt(1);
+				rsetMSSQL.close();
+				psMSSQL.close();
+				Boolean failCurrentRow = false;
+				if (rows < 1) {
+					fail = true;
+					failCurrentRow = true;
+					counterFail++;
+					// Reconstruction for user output.
+					System.out.println("FAILED: lookup in Stage "
+							+ sqlReconstruction(tableColums, rsetOracle));
+				}
+				if (rows > 1) {
+					// Investigate duplicate rows.
+					String sqlPsInvestigate = createSqlPrepareStatementOracle(
+							tableColums, rsetOracle);
+					PreparedStatement psInvestigate = connOracle
+							.prepareStatement(sqlPsInvestigate);
+					psIndex = 0;
+					for (String col : tableColums.getValue()) {
+						if (rsetOracle.getString(col) != null) {
+							psIndex++;
+							psInvestigate = createPreparedStatement(rsetOracle,
+									psInvestigate, sqlPrepareStatement, col,
+									psIndex);
+						}
+					}
+					ResultSet rsetMSSQLInvestigate = psInvestigate
+							.executeQuery();
+					rsetMSSQLInvestigate.next();
+					Integer rowsInvestigate = rsetMSSQLInvestigate.getInt(1);
+					rsetMSSQLInvestigate.close();
+					psInvestigate.close();
+					if (rowsInvestigate != rows) {
+						fail = true;
+						failCurrentRow = true;
+						counterFail++;
+						// Reconstruction for user output.
+						System.out
+								.println("FAILED: This duplicate row has a different rowcount in Publish than in Stage: "
+										+ sqlReconstruction(tableColums,
+												rsetOracle));
+					}
+				}
+				if (failCurrentRow) {
+					if (counterFail >= counterFailLimit) {
+						System.out.println("FAIL COUNT IS >= "
+								+ counterFailLimit + ", ENDING TEST...");
+						return true;
+					}
+				}
+				if (counter >= 500) {
+					counter = 0;
+					System.out
+							.println(counterTotal
+									+ "/"
+									+ totalRecordCount
+									+ " records processed.");
+				}
+			}
+			rsetOracle.close();
+		}
+		return fail;
+	}
+
+	public String createSqlPrepareStatementOracle(
+			Map.Entry<String, ArrayList<String>> tableColums, ResultSet rset)
+			throws SQLException {
+		String sqlPrepareStatement = "";
+		for (String col : tableColums.getValue()) {
+			if (sqlPrepareStatement.length() == 0)
+				sqlPrepareStatement = "select count(*) from "
+						+ tableColums.getKey() + " where ";
+			else
+				sqlPrepareStatement += "and ";
+			if (rset.getString(col) == null || rset.getString(col).isEmpty())
+				sqlPrepareStatement += col + " is null ";
+			else
+				sqlPrepareStatement += col + " = ? ";
+		}
+		return sqlPrepareStatement;
+	}
+
+	public String createSqlPrepareStatementMSSQL(
+			Map.Entry<String, ArrayList<String>> tableColums, ResultSet rset)
+			throws SQLException {
+		String sqlPrepareStatement = "";
+		for (String col : tableColums.getValue()) {
+			if (sqlPrepareStatement.length() == 0)
+				sqlPrepareStatement = "select count(*) from "
+						+ tableColums.getKey() + " where ";
+			else
+				sqlPrepareStatement += "and ";
+			if (rset.getString(col) == null)
+				sqlPrepareStatement += "(" + col + " is null or len(" + col
+						+ ") = 0) ";
+			else
+				sqlPrepareStatement += col + " = ? ";
+		}
+		return sqlPrepareStatement;
+	}
+
+	public PreparedStatement createPreparedStatement(ResultSet rset,
+			PreparedStatement ps, String sql, String col, Integer psIndex)
+			throws Exception {
+		String datatype = rset.getMetaData().getColumnTypeName(
+				rset.findColumn(col));
+		if (datatype == "NUMBER" || datatype == "numeric"
+				|| datatype == "decimal")
+			ps.setBigDecimal(psIndex, rset.getBigDecimal(col));
+		else if (datatype == "DATE" || datatype == "datetime")
+			ps.setTimestamp(psIndex, rset.getTimestamp(col));
+		else if (datatype == "VARCHAR2" || datatype == "NVARCHAR2"
+				|| datatype == "varchar" || datatype == "nvarchar")
+			ps.setString(psIndex, rset.getString(col));
+		else if (datatype == "int")
+			ps.setInt(psIndex, rsetMSSQL.getInt(col));
+		else if (datatype == "tinyint" || datatype == "smallint")
+			ps.setShort(psIndex, rsetMSSQL.getShort(col));
+		else if (datatype == "uniqueidentifier")
+			ps.setString(psIndex, "{" + rsetMSSQL.getString(col) + "}");
+		else if (datatype == "bigint")
+			ps.setLong(psIndex, rsetMSSQL.getLong(col));
+		else {
+			ps.setString(psIndex, rset.getString(col));
+			System.out.println("DATATYPE CONVERSION FOR'" + datatype
+					+ "' MUST BE ADDED TO THIS TEST");
+		}
+		return ps;
+	}
+
+	public String sqlReconstruction(
+			Map.Entry<String, ArrayList<String>> tableColums, ResultSet rset)
+			throws SQLException {
+		String sqlReconstruction = "";
+		for (String col : tableColums.getValue()) {
+			if (sqlReconstruction.length() == 0)
+				sqlReconstruction = "select * from " + tableColums.getKey()
+						+ " where ";
+			else
+				sqlReconstruction += "and ";
+			if (rset.getString(col) == null)
+				sqlReconstruction += "(" + col + " is null or len(" + col
+						+ ") = 0) ";
+			else
+				sqlReconstruction += col + " = '" + rset.getString(col) + "' ";
+		}
+		return sqlReconstruction;
+	}	
 
 }
