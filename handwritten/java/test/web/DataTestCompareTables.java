@@ -609,12 +609,12 @@ public class DataTestCompareTables {
 				sqlReconstruction = "select * from " + tableColums.getKey()
 						+ " where " + col + " ";
 			else
-				sqlReconstruction += "and " + col + " ";
+				sqlReconstruction += "and ";
 			if (rset.getString(col) == null)
 				sqlReconstruction += "(" + col + " is null or len(" + col
 						+ ") = 0) ";
 			else
-				sqlReconstruction += " = '" + rset.getString(col) + "' ";
+				sqlReconstruction += col + " = '" + rset.getString(col) + "' ";
 		}
 		return sqlReconstruction;
 	}
