@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>molgenis_test_JPA</name>
+	<name>molgenis_test</name>
 	<comment></comment>
 	<projects>
 		<project>molgenis3_3</project>
-		<project>molgenis</project>
 		<project>molgenis_JPA</project>
+		<project>molgenis</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
