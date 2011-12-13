@@ -20,6 +20,7 @@ public class DataTestPublishStage {
 	String dbUrlOracle;
 	String dbUsernameOracle;
 	String dbPasswordOracle;
+	String metadataTableOracle;
 
 	String dbDriverMSSQL;
 	String dbUrlMSSQL;
@@ -34,7 +35,6 @@ public class DataTestPublishStage {
 	Connection connMSSQL;
 	Statement stmtMSSQL;
 	ResultSet rsetMSSQL;
-
 
 	Integer counterFailLimit;
 	Integer totalRecordCount = 0;
@@ -70,9 +70,10 @@ public class DataTestPublishStage {
 	}
 
 	public void getPublishTablesColumns() throws Exception {
-		System.out
-				.println("Getting all the related tables form publ_dict_studie...");
-		String sql = "select tabnaam, veld from vw_dict group by tabnaam, veld";
+		System.out.println("Getting all the related tables form "
+				+ metadataTableOracle + "...");
+		String sql = "select tabnaam, veld from " + metadataTableOracle
+				+ " group by tabnaam, veld";
 		rsetOracle = stmtOracle.executeQuery(sql);
 		while (rsetOracle.next()) {
 			Boolean TableOrColumnNotExcluded = true;
@@ -228,11 +229,9 @@ public class DataTestPublishStage {
 		}
 		return fail;
 	}
-	
-	
+
 	public boolean lookupPublishStage() throws Exception {
-		System.out
-				.println("Starting with Publish lookup in Stage.");
+		System.out.println("Starting with Publish lookup in Stage.");
 		Boolean fail = false;
 		Integer counter = 0;
 		Integer counterTotal = 0;
@@ -320,11 +319,8 @@ public class DataTestPublishStage {
 				}
 				if (counter >= 500) {
 					counter = 0;
-					System.out
-							.println(counterTotal
-									+ "/"
-									+ totalRecordCount
-									+ " records processed.");
+					System.out.println(counterTotal + "/" + totalRecordCount
+							+ " records processed.");
 				}
 			}
 			rsetOracle.close();
@@ -415,6 +411,6 @@ public class DataTestPublishStage {
 				sqlReconstruction += col + " = '" + rset.getString(col) + "' ";
 		}
 		return sqlReconstruction;
-	}	
+	}
 
 }
