@@ -16,15 +16,15 @@ public class DataTestPublishStageLookup {
 				+ databaseOracle;
 		DataTestPublishStage.dbUsernameOracle = "molgenis";
 		DataTestPublishStage.dbPasswordOracle = "molTagtGen24Ora";
+		DataTestPublishStage.metadataTableOracle = "vw_dict";
 
-		String server2 = "W3ZKHAS323";
-		String database2 = "LLCDR_Stage";
+		String serverMSSQL = "W3ZKHAS323";
+		String databaseMSSQL = "LLCDR_Stage";
 		DataTestPublishStage.dbDriverMSSQL = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-		DataTestPublishStage.dbUrlMSSQL = "jdbc:sqlserver://" + server2
-				+ ";databaseName=" + database2 + ";integratedSecurity=true";
+		DataTestPublishStage.dbUrlMSSQL = "jdbc:sqlserver://" + serverMSSQL
+				+ ";databaseName=" + databaseMSSQL + ";integratedSecurity=true";
 
-		DataTestPublishStage.excludedTables = new String[] { "UVDEMOG",
-				"UVHEALTH", "ONDERZOEKPATIENT", "BLOEDDRUKAVG", "BEZOEK1", "ECGLEADS", "PATIENT", "UVPANAS"};
+		DataTestPublishStage.excludedTables = new String[] { "UVHEALTH", "ONDERZOEKPATIENT", "BLOEDDRUKAVG", "BEZOEK1", "UVDEMOG", "ECGLEADS" };
 		DataTestPublishStage.excludedColumns = new String[] { "PA_ID" };
 
 		DataTestPublishStage.init();
