@@ -20,7 +20,7 @@ public class DataTestPublishStage {
 	String dbUrlOracle;
 	String dbUsernameOracle;
 	String dbPasswordOracle;
-	String metadataTableOracle;
+	String metadataQueryOracle;
 
 	String dbDriverMSSQL;
 	String dbUrlMSSQL;
@@ -70,35 +70,32 @@ public class DataTestPublishStage {
 	}
 
 	public void getPublishTablesColumns() throws Exception {
-		System.out.println("Getting all the related tables form "
-				+ metadataTableOracle + "...");
-		String sql = "select tabnaam, veld from " + metadataTableOracle
-				+ " group by tabnaam, veld";
-		rsetOracle = stmtOracle.executeQuery(sql);
+		System.out.println("Getting all the related tables form metadata...");
+		rsetOracle = stmtOracle.executeQuery(metadataQueryOracle);
 		while (rsetOracle.next()) {
 			Boolean TableOrColumnNotExcluded = true;
 			for (int i = 0; i < excludedTables.length; i++) {
-				if (excludedTables[i].equals(rsetOracle.getString(1)))
+				if (excludedTables[i].equals(rsetOracle.getString(1).toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			for (int i = 0; i < excludedColumns.length; i++) {
-				if (excludedColumns[i].equals(rsetOracle.getString(2)))
+				if (excludedColumns[i].equals(rsetOracle.getString(2).toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			if (TableOrColumnNotExcluded) {
-				if (publishTablesColumns.get(rsetOracle.getString(1)) == null) {
+				if (publishTablesColumns.get(rsetOracle.getString(1).toUpperCase()) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns.add(rsetOracle.getString(2));
+					dbColumns.add(rsetOracle.getString(2).toUpperCase());
 					publishTablesColumns
-							.put(rsetOracle.getString(1), dbColumns);
+							.put(rsetOracle.getString(1).toUpperCase(), dbColumns);
 				} else {
 					ArrayList<String> dbColumns = new ArrayList<String>();
 					dbColumns = publishTablesColumns.get(rsetOracle
-							.getString(1));
-					if (dbColumns.contains(rsetOracle.getString(2)) == false)
-						dbColumns.add(rsetOracle.getString(2));
+							.getString(1).toUpperCase());
+					if (dbColumns.contains(rsetOracle.getString(2).toUpperCase()) == false)
+						dbColumns.add(rsetOracle.getString(2).toUpperCase());
 					publishTablesColumns
-							.put(rsetOracle.getString(1), dbColumns);
+							.put(rsetOracle.getString(1).toUpperCase(), dbColumns);
 				}
 			}
 		}

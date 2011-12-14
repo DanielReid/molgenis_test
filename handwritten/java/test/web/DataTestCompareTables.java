@@ -28,11 +28,10 @@ public class DataTestCompareTables {
 	String dbUrlOracle;
 	String dbUsernameOracle;
 	String dbPasswordOracle;
-	String sqlQueryOracle;
+	String metadataQueryOracle;
 
 	String dbDriverMSSQL;
 	String dbUrlMSSQL;
-	String sqlQueryMSSQL;
 
 	String[] excludedTables;
 	String[] excludedColumns;
@@ -103,36 +102,36 @@ public class DataTestCompareTables {
 	 */
 	public void getPublishUmcgTablesColumns() throws Exception {
 		// Select all tables and columns from the UMCG Publish database
-		rsetMSSQL = stmtMSSQL.executeQuery(sqlQueryMSSQL);
-		while (rsetMSSQL.next()) {
+		rsetOracle = stmtOracle.executeQuery(metadataQueryOracle);
+		while (rsetOracle.next()) {
 			// Check if the table or column is excluded.
 			Boolean TableOrColumnNotExcluded = true;
 			for (int i = 0; i < excludedTables.length; i++) {
 				if (excludedTables[i].toUpperCase().equals(
-						rsetMSSQL.getString(1).toUpperCase()))
+						rsetOracle.getString(1).toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			for (int i = 0; i < excludedColumns.length; i++) {
 				if (excludedColumns[i].toUpperCase().equals(
-						rsetMSSQL.getString(2).toUpperCase()))
+						rsetOracle.getString(2).toUpperCase()))
 					TableOrColumnNotExcluded = false;
 			}
 			if (TableOrColumnNotExcluded) {
 				// Put table and columns relations in a global variable
 				// publishUmcgTablesColumns
-				if (publishUmcgTablesColumns.get(rsetMSSQL.getString(1)) == null) {
+				if (publishUmcgTablesColumns.get(rsetOracle.getString(1)) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns.add(rsetMSSQL.getString(2).toUpperCase());
-					publishUmcgTablesColumns.put(rsetMSSQL.getString(1)
+					dbColumns.add(rsetOracle.getString(2).toUpperCase());
+					publishUmcgTablesColumns.put(rsetOracle.getString(1)
 							.toUpperCase(), dbColumns);
 				} else {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns = publishUmcgTablesColumns.get(rsetMSSQL
+					dbColumns = publishUmcgTablesColumns.get(rsetOracle
 							.getString(1).toUpperCase());
 					if (dbColumns
-							.contains(rsetMSSQL.getString(2).toUpperCase()) == false)
-						dbColumns.add(rsetMSSQL.getString(2).toUpperCase());
-					publishUmcgTablesColumns.put(rsetMSSQL.getString(1)
+							.contains(rsetOracle.getString(2).toUpperCase()) == false)
+						dbColumns.add(rsetOracle.getString(2).toUpperCase());
+					publishUmcgTablesColumns.put(rsetOracle.getString(1)
 							.toUpperCase(), dbColumns);
 				}
 			}
@@ -149,7 +148,7 @@ public class DataTestCompareTables {
 	 */
 	public void getPublishCitTablesColumns() throws Exception {
 		// Select all tables and columns from the UMCG Publish database
-		rsetOracle = stmtOracle.executeQuery(sqlQueryOracle);
+		rsetOracle = stmtOracle.executeQuery(metadataQueryOracle);
 		while (rsetOracle.next()) {
 			// Check if the table or column is excluded.
 			Boolean TableOrColumnNotExcluded = true;
