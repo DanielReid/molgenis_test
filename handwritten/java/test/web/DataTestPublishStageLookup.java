@@ -16,7 +16,7 @@ public class DataTestPublishStageLookup {
 				+ databaseOracle;
 		DataTestPublishStage.dbUsernameOracle = "molgenis";
 		DataTestPublishStage.dbPasswordOracle = "molTagtGen24Ora";
-		DataTestPublishStage.metadataTableOracle = "vw_dict";
+		DataTestPublishStage.metadataQueryOracle = "select tabnaam, veld from vw_dict group by tabnaam, veld";
 
 		String serverMSSQL = "W3ZKHAS323";
 		String databaseMSSQL = "LLCDR_Stage";

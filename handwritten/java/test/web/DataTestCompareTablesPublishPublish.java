@@ -16,25 +16,15 @@ public class DataTestCompareTablesPublishPublish {
 				+ databaseOracle;
 		DataTestCompareTables.dbUsernameOracle = "molgenis";
 		DataTestCompareTables.dbPasswordOracle = "molTagtGen24Ora";
-		DataTestCompareTables.sqlQueryOracle = "select s.synonym_name, atc.column_name  from all_tab_columns atc left join all_synonyms s on (atc.owner = s.table_owner and atc.table_name = s.table_name) where s.owner = 'MOLGENIS'";
-
+		DataTestCompareTables.metadataQueryOracle = "select tabnaam, veld from vw_dict group by tabnaam, veld";
+		
 		String serverMSSQL = "W3ZKHAS323";
 		String databaseMSSQL = "LLCDR_Publ";
 		DataTestCompareTables.dbDriverMSSQL = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 		DataTestCompareTables.dbUrlMSSQL = "jdbc:sqlserver://" + serverMSSQL
 				+ ";databaseName=" + databaseMSSQL + ";integratedSecurity=true";
-		DataTestCompareTables.sqlQueryMSSQL = "select TABLE_NAME, COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS";
 
-		DataTestCompareTables.excludedTables = new String[] { "PUBL_DICT",
-				"DICT_REF", "SETTINGS", "PUBL_DICT_REFS", "DICT",
-				"VW_UVSOCIAL", "VW_BLOEDDRUKAVG", "VW_UVRAND36",
-				"VW_MEDICATIE", "VW_UVFEMALE", "VW_UVPANAS", "VW_ECG",
-				"VW_ECGLEADS", "VW_SPIROMETRIE", "VW_PATIENT", "VW_ONDERZOEK",
-				"VW_UVSTRESS", "VW_LABDATA", "VW_MINIV2", "VW_MINIV3",
-				"VW_MMSE", "VW_BEZOEK", "VW_UVDEMOG", "VW_UVHEALTH",
-				"VW_BEZOEK1", "VW_ONDERZOEKPATIENT", "VW_MINI", "VW_DICT",
-				"VW_UVWORK", "VW_UVNEOP1", "VW_UVSCL90", "VW_BEP_OMSCHR",
-				"LABDATA" };
+		DataTestCompareTables.excludedTables = new String[] { "LABDATA" };
 		DataTestCompareTables.excludedColumns = new String[] {};
 
 		DataTestCompareTables.init();
