@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.google.common.base.Joiner;
-
 public class DataTestMatrix {
 
 	String dbDriver;
@@ -29,6 +27,8 @@ public class DataTestMatrix {
 	String sourceTablePrefix;
 	String sourceOwner;
 	String matrixSeperator;
+	String matrixColumnSeperator;
+	String matrixStringDateFormat;
 
 	String filter1Table = "";
 	String filter1Column = "";
@@ -43,7 +43,7 @@ public class DataTestMatrix {
 	Statement stmt;
 	ResultSet rset;
 	String[] paidMatrixColumnNameParts;
-	Map<Integer, String> matrixColumnsIndex = new HashMap<Integer, String>();
+	Map<String, Integer> matrixColumnsIndex = new HashMap<String, Integer>();
 	Map<String, ArrayList<String>> publishTablesColumns = new HashMap<String, ArrayList<String>>();
 
 	public void init() {
@@ -60,22 +60,20 @@ public class DataTestMatrix {
 
 	public void getMatrixColumnsIndex() throws Exception {
 		System.out.println("Getting Matrix column index...");
-		FileInputStream fstream = new FileInputStream(file);
-		DataInputStream in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				new DataInputStream(new FileInputStream(file))));
 		String strLine = br.readLine();
 		String[] matrixColumns = strLine.split(matrixSeperator);
-		for (int i = 0; i < matrixColumns.length; i++) {
+		for (int i = 0; i < matrixColumns.length; i++)
 			if (matrixColumns[i].length() != 0)
-				matrixColumnsIndex.put(i, matrixColumns[i]);
-		}
-		in.close();
+				matrixColumnsIndex.put(matrixColumns[i], i);
+		br.close();
 	}
 
 	public Boolean getPA_ID() {
-		for (String column : matrixColumnsIndex.values()) {
+		for (String column : matrixColumnsIndex.keySet()) {
 			if (column.contains("PA_ID")) {
-				paidMatrixColumnNameParts = column.split("__");
+				paidMatrixColumnNameParts = column.split(matrixColumnSeperator);
 				if (paidMatrixColumnNameParts.length == 2) {
 					return false;
 				}
@@ -88,9 +86,10 @@ public class DataTestMatrix {
 	public boolean getPublishTablesColumns() throws Exception {
 		System.out.println("Generating Publish table column structure...");
 		boolean fail = false;
-		for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
+		for (Map.Entry<String, Integer> matrixColumn : matrixColumnsIndex
 				.entrySet()) {
-			String[] matrixColumnParts = matrixColumn.getValue().split("__");
+			String[] matrixColumnParts = matrixColumn.getKey().split(
+					matrixColumnSeperator);
 			if (matrixColumnParts.length == 2) {
 				if (tableColumnExists(sourceOwner, sourceTablePrefix
 						+ matrixColumnParts[0], matrixColumnParts[1])) {
@@ -115,94 +114,74 @@ public class DataTestMatrix {
 					fail = true;
 				}
 			} else {
-				if (matrixColumn.getValue().equals("")
-						|| matrixColumn.getValue().equals("ROWNUMBER")) {
-				} else {
-					System.out
-							.println("FAIL: '"
-									+ matrixColumn.getValue()
-									+ "' not conform format. (can not extract the source table and column name)");
-					fail = true;
-				}
+				System.out
+						.println("FAIL: '"
+								+ matrixColumn.getValue()
+								+ "' not conform format. (can not extract the source table and column name)");
+				fail = true;
 			}
 		}
 		return fail;
 	}
 
-	boolean tableExists(String owner, String table) throws Exception {
-		rset = stmt
-				.executeQuery("select count(*) from dba_all_tables where owner='"
-						+ owner + "' and table_name='" + table + "'");
-		rset.next();
-		if (rset.getString(1).equals("1"))
-			return true;
-		return false;
-	}
-
-	boolean tableColumnExists(String owner, String table, String column)
-			throws Exception {
-		rset = stmt
-				.executeQuery("select count(*) from dba_tab_columns where owner='"
-						+ owner
-						+ "' and table_name='"
-						+ table
-						+ "' and column_name = '" + column + "'");
-		rset.next();
-		if (rset.getString(1).equals("1"))
-			return true;
-		return false;
-	}
-
 	public void makeGlobalTable() throws Exception {
 		System.out.println("Making global table...");
 		if (tableExists(testOwner, testTablePrefix + "GLOBAL"))
-			stmt.executeQuery("drop table " + testTablePrefix + "GLOBAL");
-		stmt.executeQuery("create table "
-				+ testTablePrefix
-				+ "GLOBAL"
-				+ " ("
-				+ Joiner.on(" varchar(255), ")
-						.join(matrixColumnsIndex.values()) + "  varchar(255))");
+			stmt.execute("drop table " + testTablePrefix + "GLOBAL");
+		String sql = "create table " + testTablePrefix + "GLOBAL (";
+		for (Integer key : matrixColumnsIndex.values())
+			sql += "c" + key + " varchar(255), ";
+		sql = sql.substring(0, sql.length() - 2) + ")";
+		stmt.execute(sql);
 	}
 
-	public void fillGlobalTable() throws Exception {
+	public boolean fillGlobalTable() throws Exception {
+		boolean fail = false;
 		System.out.println("Filling global table...");
-		String sql;
-		String line;
 		String[] lineParts;
-		ArrayList<String> values = new ArrayList<String>();
-		FileInputStream fstream = new FileInputStream(file);
-		DataInputStream in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				new DataInputStream(new FileInputStream(file))));
 		// skip first line column names
 		br.readLine();
+		String insertIntoSql = "insert into " + testTablePrefix + "GLOBAL (";
+		for (Integer key : matrixColumnsIndex.values())
+			insertIntoSql += "c" + key + ", ";
+		insertIntoSql = insertIntoSql.substring(0, insertIntoSql.length() - 2)
+				+ ") ";
 
-		sql = "INSERT INTO " + testTablePrefix + "GLOBAL ("
-				+ Joiner.on(", ").join(matrixColumnsIndex.values()) + ")\n";
-
-		// first data line
-		if ((line = br.readLine()) != null) {
-			lineParts = line.split(matrixSeperator);
-			values.clear();
-			for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
-					.entrySet()) {
-				values.add("'" + lineParts[matrixColumn.getKey()] + "'");
-			}
-			sql += "SELECT " + Joiner.on(", ").join(values) + " FROM DUAL\n";
-		}
-
+		String line;
+		Integer totalCounter = 1;
+		Integer counter = 1;
 		while ((line = br.readLine()) != null) {
-			lineParts = line.split(matrixSeperator);
-			values.clear();
-			for (Map.Entry<Integer, String> matrixColumn : matrixColumnsIndex
-					.entrySet()) {
-				values.add("'" + lineParts[matrixColumn.getKey()] + "'");
+			totalCounter++;
+			counter++;
+			if (counter >= 500) {
+				counter = 0;
+				System.out.println("Rowcount: " + totalCounter);
 			}
-			sql += "union all select " + Joiner.on(", ").join(values)
-					+ " from dual\n";
+			Boolean exception = false;
+			lineParts = line.split(matrixSeperator);
+			String selectSql = "select ";
+			for (Integer key : matrixColumnsIndex.values()) {
+				try {
+					selectSql += "'" + lineParts[key].replace("'", "''")
+							+ "', ";
+				} catch (Exception e) {
+					exception = true;
+					fail = true;
+				}
+			}
+			if (exception) {
+				System.out.println("FAIL: Wrong line length. Line: " + line);
+			} else {
+				selectSql = selectSql.substring(0, selectSql.length() - 2)
+						+ " from dual";
+				// System.out.println(insertIntoSql + selectSql);
+				stmt.executeQuery(insertIntoSql + selectSql);
+			}
 		}
-		in.close();
-		stmt.executeQuery(sql);
+		br.close();
+		return fail;
 	}
 
 	public void makeTables() throws Exception {
@@ -212,31 +191,32 @@ public class DataTestMatrix {
 			if (tableExists(testOwner, testTablePrefix + entry.getKey()))
 				stmt.executeQuery("drop table " + testTablePrefix
 						+ entry.getKey());
-			stmt.executeQuery("create table " + testTablePrefix
-					+ entry.getKey() + " ("
-					+ Joiner.on(" varchar(255), ").join(entry.getValue())
-					+ "  varchar(255))");
+			String sql = "create table " + testTablePrefix + entry.getKey()
+					+ " (";
+			for (String value : entry.getValue())
+				sql += value + " varchar(255), ";
+			sql = sql.substring(0, sql.length() - 2) + ")";
+			stmt.executeQuery(sql);
 		}
 	}
 
 	public void fillTables() throws Exception {
 		System.out.println("Filling tables...");
-		ArrayList<String> combineTableColumn = new ArrayList<String>();
 		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
 				.entrySet()) {
-			combineTableColumn.clear();
-			for (String column : entry.getValue()) {
-				if (paidMatrixColumnNameParts[1] == column)
-					combineTableColumn.add(paidMatrixColumnNameParts[0] + "__"
-							+ column);
-				else
-					combineTableColumn.add(entry.getKey() + "__" + column);
-			}
+			String table = entry.getKey();
 			String sql = "insert into " + testTablePrefix + entry.getKey()
-					+ " (" + Joiner.on(", ").join(entry.getValue())
-					+ ") select " + Joiner.on(", ").join(combineTableColumn)
-					+ " from " + testTablePrefix + "GLOBAL group by "
-					+ Joiner.on(", ").join(combineTableColumn);
+					+ " (";
+			for (String column : entry.getValue())
+				sql += column + ", ";
+			sql = sql.substring(0, sql.length() - 2) + ") ";
+			sql += "select ";
+			for (String column : entry.getValue())
+				sql += "c"
+						+ matrixColumnsIndex.get(table + matrixColumnSeperator
+								+ column) + ", ";
+			sql = sql.substring(0, sql.length() - 2) + " from "
+					+ testTablePrefix + "GLOBAL ";
 			stmt.executeQuery(sql);
 		}
 	}
@@ -245,47 +225,112 @@ public class DataTestMatrix {
 		boolean fail = false;
 		for (Map.Entry<String, ArrayList<String>> entry : publishTablesColumns
 				.entrySet()) {
-			System.out.println("Comparing " + entry.getKey() + "...");
+			String table = entry.getKey();
+			System.out.println("Comparing " + table + "...");
+
+			String testTableSql = "select ";
+			for (String column : entry.getValue())
+				testTableSql += "case when upper(" + column
+						+ ") ='NULL' then null else " + column + " end as "
+						+ column + ", ";
+			testTableSql = testTableSql.substring(0, testTableSql.length() - 2)
+					+ " from " + testTablePrefix + table + " ";
+			// Filter rows with only NULL values because this can be a permitted
+			// result from joining multiple tables.
+			testTableSql += "where ";
+			for (String column : entry.getValue())
+				testTableSql += column + " is not null and ";
+			testTableSql = testTableSql.substring(0, testTableSql.length() - 4);
+
+			String baseTableSql = "select ";
 			for (String column : entry.getValue()) {
-				String sql = "";
-
-				String sqlTestTable = "select case  when substr(" + column
-						+ ", length(" + column + ")-1, 2) = '.0'  then substr("
-						+ column + ", 0, length(" + column + ")-2) else "
-						+ column + " end as " + column + " from "
-						+ testTablePrefix + entry.getKey() + " ";
-
-				String sqlSourceTable = "select to_char(" + column + ") from "
-						+ sourceOwner + "." + sourceTablePrefix
-						+ entry.getKey() + " ";
-
-				if (filter1Table.length() != 0
-						&& filter1Table.equals(entry.getKey()))
-					sqlSourceTable += "where " + filter1Column + " "
-							+ filter1Operator + " '" + filter1Value + "' ";
-
-				if (filter2Table.length() != 0
-						&& filter2Table.equals(entry.getKey()))
-					sqlSourceTable += "and " + filter2Column + " "
-							+ filter2Operator + " '" + filter2Value + "' ";
-
-				sql = "select count(*) from (" + sqlTestTable + " minus "
-						+ sqlSourceTable + ")";
-
-				rset = stmt.executeQuery(sql);
+				rset = stmt
+						.executeQuery("select data_type from ALL_TAB_COLUMNS where owner = '"
+								+ testOwner
+								+ "' and table_name='"
+								+ table
+								+ "' and column_name = '" + column + "'");
 				rset.next();
-				if (Integer.parseInt(rset.getString(1)) == 0) {
-					System.out.println("SUCCES " + entry.getKey() + "__"
-							+ column + " data in source (with '.0' fix)");
-				} else {
-					fail = true;
-					System.out.println("FAILED datacompare for: "
-							+ entry.getKey() + "__" + column);
-				}
-
+				if (rset.getString(1).equals("DATE"))
+					baseTableSql += "to_char(" + column + ", '"
+							+ matrixStringDateFormat + "'), ";
+				else
+					baseTableSql += "to_char(" + column + "), ";
 			}
+			baseTableSql = baseTableSql.substring(0, baseTableSql.length() - 2)
+					+ " from " + table;
+
+			String sql = "select count(*) from (" + testTableSql + " minus "
+					+ baseTableSql + ") ";
+			rset = stmt.executeQuery(sql);
+			rset.next();
+			if (Integer.parseInt(rset.getString(1)) == 0)
+				System.out.println("SUCCES " + table + " data in source.");
+			else {
+				fail = true;
+				System.out.println("FAILED datacompare for: " + table);
+				System.out.println(sql);
+			}
+
+			/*
+			 * String sql = "";
+			 * 
+			 * String sqlTestTable = "select " + column + " from " +
+			 * testTablePrefix + entry.getKey() + " ";
+			 * 
+			 * // select case when DEMO12A2 is null then 'null' else //
+			 * to_char(DEMO12A2) end as tada from MOLGENIS1.UVDEMOG
+			 * 
+			 * String sqlSourceTable = "select case when " + column +
+			 * " is null then '' else to_char(" + column + ") end as from " +
+			 * sourceOwner + "." + sourceTablePrefix + entry.getKey() + " ";
+			 * 
+			 * if (filter1Table.length() != 0 &&
+			 * filter1Table.equals(entry.getKey())) sqlSourceTable += "where " +
+			 * filter1Column + " " + filter1Operator + " '" + filter1Value +
+			 * "' ";
+			 * 
+			 * if (filter2Table.length() != 0 &&
+			 * filter2Table.equals(entry.getKey())) sqlSourceTable += "and " +
+			 * filter2Column + " " + filter2Operator + " '" + filter2Value +
+			 * "' ";
+			 * 
+			 * sql = "select count(*) from (" + sqlTestTable + " minus " +
+			 * sqlSourceTable + ")";
+			 * 
+			 * rset = stmt.executeQuery(sql); rset.next(); if
+			 * (Integer.parseInt(rset.getString(1)) == 0) {
+			 * System.out.println("SUCCES " + entry.getKey() +
+			 * matrixColumnSeperator + column + " data in source."); } else {
+			 * fail = true; System.out.println("FAILED datacompare for: " +
+			 * entry.getKey() + matrixColumnSeperator + column);
+			 * System.out.println(sql); }
+			 */
+
 		}
 		return fail;
+	}
+
+	boolean tableExists(String owner, String table) throws Exception {
+		rset = stmt
+				.executeQuery("select count(*) from all_all_tables where owner='"
+						+ owner + "' and table_name='" + table + "'");
+		rset.next();
+		if (rset.getString(1).equals("1"))
+			return true;
+		return false;
+	}
+
+	boolean tableColumnExists(String owner, String table, String column)
+			throws Exception {
+		String sql = "select count(*) from all_tab_columns where owner='"
+				+ owner + "' and table_name='" + table
+				+ "' and column_name = '" + column + "'";
+		rset = stmt.executeQuery(sql);
+		rset.next();
+		if (rset.getString(1).equals("1"))
+			return true;
+		return false;
 	}
 
 }

@@ -10,25 +10,31 @@ public class DataTestMatrixLookupComplete {
 	public void init() throws Exception {
 		DataTestMatrix.dbDriver = "oracle.jdbc.driver.OracleDriver";
 		DataTestMatrix.dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
-		DataTestMatrix.dbUsername = "molgenis";
-		DataTestMatrix.dbPassword = "molTagtGen24Ora";
+		DataTestMatrix.dbUsername = "MOLGENIS1";
+		DataTestMatrix.dbPassword = "talpa010t";
 
 		DataTestMatrix.file = "/pheno_complete.txt";
 
-		DataTestMatrix.testTablePrefix = "T2_";
-		DataTestMatrix.testOwner = "MOLGENIS";
+		DataTestMatrix.testTablePrefix = "TEST_";
+		DataTestMatrix.testOwner = "MOLGENIS1";
 		DataTestMatrix.sourceTablePrefix = "";
-		DataTestMatrix.sourceOwner = "LLPOPER";
+		DataTestMatrix.sourceOwner = "MOLGENIS1";
 		DataTestMatrix.matrixSeperator = "\t";
+		DataTestMatrix.matrixColumnSeperator = "__";
+		DataTestMatrix.matrixStringDateFormat = "yyyy-mm-dd";
 
 		DataTestMatrix.init();
 		DataTestMatrix.getMatrixColumnsIndex();
-		if (DataTestMatrix.getPA_ID())
+		if (DataTestMatrix.getPA_ID()) {
 			Assert.assertFalse(true);
-		if (DataTestMatrix.getPublishTablesColumns())
+		}
+		if (DataTestMatrix.getPublishTablesColumns()) {
 			Assert.assertFalse(true);
+		}
 		DataTestMatrix.makeGlobalTable();
-		DataTestMatrix.fillGlobalTable();
+		if (DataTestMatrix.fillGlobalTable()) {
+			//Assert.assertFalse(true);
+		}
 		DataTestMatrix.makeTables();
 		DataTestMatrix.fillTables();
 	}
