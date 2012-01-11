@@ -30,16 +30,6 @@ public class DataTestMatrix {
 	String matrixColumnSeperator;
 	String matrixStringDateFormat;
 
-	String filter1Table = "";
-	String filter1Column = "";
-	String filter1Operator = "";
-	String filter1Value = "";
-
-	String filter2Table = "";
-	String filter2Column = "";
-	String filter2Operator = "";
-	String filter2Value = "";
-
 	Statement stmt;
 	ResultSet rset;
 	String[] paidMatrixColumnNameParts;
@@ -160,6 +150,9 @@ public class DataTestMatrix {
 				System.out.println("Rowcount: " + totalCounter);
 			}
 			Boolean exception = false;
+			if (line.substring(line.length() - 1).equals("\t")) {
+				line = line + "NULL";
+			}
 			lineParts = line.split(matrixSeperator);
 			String selectSql = "select ";
 			for (Integer key : matrixColumnsIndex.values()) {
@@ -271,42 +264,6 @@ public class DataTestMatrix {
 				System.out.println("FAILED datacompare for: " + table);
 				System.out.println(sql);
 			}
-
-			/*
-			 * String sql = "";
-			 * 
-			 * String sqlTestTable = "select " + column + " from " +
-			 * testTablePrefix + entry.getKey() + " ";
-			 * 
-			 * // select case when DEMO12A2 is null then 'null' else //
-			 * to_char(DEMO12A2) end as tada from MOLGENIS1.UVDEMOG
-			 * 
-			 * String sqlSourceTable = "select case when " + column +
-			 * " is null then '' else to_char(" + column + ") end as from " +
-			 * sourceOwner + "." + sourceTablePrefix + entry.getKey() + " ";
-			 * 
-			 * if (filter1Table.length() != 0 &&
-			 * filter1Table.equals(entry.getKey())) sqlSourceTable += "where " +
-			 * filter1Column + " " + filter1Operator + " '" + filter1Value +
-			 * "' ";
-			 * 
-			 * if (filter2Table.length() != 0 &&
-			 * filter2Table.equals(entry.getKey())) sqlSourceTable += "and " +
-			 * filter2Column + " " + filter2Operator + " '" + filter2Value +
-			 * "' ";
-			 * 
-			 * sql = "select count(*) from (" + sqlTestTable + " minus " +
-			 * sqlSourceTable + ")";
-			 * 
-			 * rset = stmt.executeQuery(sql); rset.next(); if
-			 * (Integer.parseInt(rset.getString(1)) == 0) {
-			 * System.out.println("SUCCES " + entry.getKey() +
-			 * matrixColumnSeperator + column + " data in source."); } else {
-			 * fail = true; System.out.println("FAILED datacompare for: " +
-			 * entry.getKey() + matrixColumnSeperator + column);
-			 * System.out.println(sql); }
-			 */
-
 		}
 		return fail;
 	}

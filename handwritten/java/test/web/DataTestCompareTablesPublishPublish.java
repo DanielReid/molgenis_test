@@ -14,8 +14,8 @@ public class DataTestCompareTablesPublishPublish {
 		String databaseOracle = "llptest";
 		DataTestCompareTables.dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/"
 				+ databaseOracle;
-		DataTestCompareTables.dbUsernameOracle = "molgenis";
-		DataTestCompareTables.dbPasswordOracle = "molTagtGen24Ora";
+		DataTestCompareTables.dbUsernameOracle = "molgenis1";
+		DataTestCompareTables.dbPasswordOracle = "talpa010t";
 		DataTestCompareTables.metadataQueryOracle = "select tabnaam, veld from vw_dict group by tabnaam, veld";
 		
 		String serverMSSQL = "W3ZKHAS323";
@@ -24,7 +24,7 @@ public class DataTestCompareTablesPublishPublish {
 		DataTestCompareTables.dbUrlMSSQL = "jdbc:sqlserver://" + serverMSSQL
 				+ ";databaseName=" + databaseMSSQL + ";integratedSecurity=true";
 
-		DataTestCompareTables.excludedTables = new String[] { "LABDATA" };
+		DataTestCompareTables.excludedTables = new String[] {};
 		DataTestCompareTables.excludedColumns = new String[] {};
 
 		DataTestCompareTables.init();
