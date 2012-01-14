@@ -29,7 +29,7 @@ fixme: test meta model on dubplicate fields (or implement override)
 			<field name="id" type="autoid" />
 			<field name="normalVarchar" label="Normal Varchar" type="varchar"
 				unique="true" length="127" >
-                                <annotations>@Pattern(regexp="[A-Z]@[A-Z].nl")</annotations>    
+                                <annotations>@javax.validation.constraints.Pattern(regexp="[A-Z]@[A-Z].nl")</annotations>    
                         </field>
 			<field name="readonlyVarchar" label="Readonly Varchar" type="varchar"
 				readonly="true" default="readonly default"/>
