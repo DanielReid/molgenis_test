@@ -13,13 +13,12 @@ public class DataTestMatrixLookupComplete {
 		DataTestMatrix.dbUsername = "MOLGENIS1";
 		DataTestMatrix.dbPassword = "talpa010t";
 
-		DataTestMatrix.file = "/pheno_complete.txt";
+		DataTestMatrix.file = "/download.csv";
 
 		DataTestMatrix.testTablePrefix = "TEST_";
 		DataTestMatrix.testOwner = "MOLGENIS1";
 		DataTestMatrix.sourceTablePrefix = "";
 		DataTestMatrix.sourceOwner = "MOLGENIS1";
-		DataTestMatrix.matrixSeperator = "\t";
 		DataTestMatrix.matrixColumnSeperator = "__";
 		DataTestMatrix.matrixStringDateFormat = "yyyy-mm-dd";
 
