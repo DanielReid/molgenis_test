@@ -1,7 +1,5 @@
 package test.web;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
@@ -12,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import au.com.bytecode.opencsv.CSVReader;
 
 public class DataTestMatrix {
 
@@ -26,7 +25,6 @@ public class DataTestMatrix {
 	String testOwner;
 	String sourceTablePrefix;
 	String sourceOwner;
-	String matrixSeperator;
 	String matrixColumnSeperator;
 	String matrixStringDateFormat;
 
@@ -50,14 +48,34 @@ public class DataTestMatrix {
 
 	public void getMatrixColumnsIndex() throws Exception {
 		System.out.println("Getting Matrix column index...");
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new DataInputStream(new FileInputStream(file))));
-		String strLine = br.readLine();
-		String[] matrixColumns = strLine.split(matrixSeperator);
-		for (int i = 0; i < matrixColumns.length; i++)
-			if (matrixColumns[i].length() != 0)
-				matrixColumnsIndex.put(matrixColumns[i], i);
-		br.close();
+		CSVReader reader = new CSVReader(new InputStreamReader(
+				new FileInputStream(file), "UTF-8"));
+		String[] headerLine = reader.readNext();
+		for (int i = 0; i < headerLine.length; i++) {
+			if (headerLine[i].length() != 0) {
+				String[] matrixColumnParts = headerLine[i]
+						.split(matrixColumnSeperator);
+				if (matrixColumnParts.length == 2) {
+					if (tableColumnExists(sourceOwner, sourceTablePrefix
+							+ matrixColumnParts[0], matrixColumnParts[1])) {
+						matrixColumnsIndex.put(headerLine[i], i);
+					} else {
+						System.out
+								.println("WARNING: '"
+										+ sourceTablePrefix
+										+ matrixColumnParts[0]
+										+ "."
+										+ matrixColumnParts[1]
+										+ "' (based on matrix column) not in source. IGNORING!");
+					}
+				} else {
+					System.out
+							.println("WARNING: '"
+									+ headerLine[i]
+									+ "' not conform metadata format. (can not extract the source table and column name). IGNORING!");
+				}
+			}
+		}
 	}
 
 	public Boolean getPA_ID() {
@@ -80,35 +98,16 @@ public class DataTestMatrix {
 				.entrySet()) {
 			String[] matrixColumnParts = matrixColumn.getKey().split(
 					matrixColumnSeperator);
-			if (matrixColumnParts.length == 2) {
-				if (tableColumnExists(sourceOwner, sourceTablePrefix
-						+ matrixColumnParts[0], matrixColumnParts[1])) {
-					if (publishTablesColumns.get(matrixColumnParts[0]) == null) {
-						ArrayList<String> dbColumns = new ArrayList<String>();
-						dbColumns.add(matrixColumnParts[1]);
-						publishTablesColumns.put(matrixColumnParts[0],
-								dbColumns);
-					} else {
-						ArrayList<String> dbColumns = new ArrayList<String>();
-						dbColumns = publishTablesColumns
-								.get(matrixColumnParts[0]);
-						if (dbColumns.contains(matrixColumnParts[1]) == false)
-							dbColumns.add(matrixColumnParts[1]);
-						publishTablesColumns.put(matrixColumnParts[0],
-								dbColumns);
-					}
-				} else {
-					System.out.println("FAIL: '" + sourceTablePrefix
-							+ matrixColumnParts[0] + "." + matrixColumnParts[1]
-							+ "' (based on matrix column) not in source");
-					fail = true;
-				}
+			if (publishTablesColumns.get(matrixColumnParts[0]) == null) {
+				ArrayList<String> dbColumns = new ArrayList<String>();
+				dbColumns.add(matrixColumnParts[1]);
+				publishTablesColumns.put(matrixColumnParts[0], dbColumns);
 			} else {
-				System.out
-						.println("FAIL: '"
-								+ matrixColumn.getValue()
-								+ "' not conform format. (can not extract the source table and column name)");
-				fail = true;
+				ArrayList<String> dbColumns = new ArrayList<String>();
+				dbColumns = publishTablesColumns.get(matrixColumnParts[0]);
+				if (dbColumns.contains(matrixColumnParts[1]) == false)
+					dbColumns.add(matrixColumnParts[1]);
+				publishTablesColumns.put(matrixColumnParts[0], dbColumns);
 			}
 		}
 		return fail;
@@ -128,21 +127,19 @@ public class DataTestMatrix {
 	public boolean fillGlobalTable() throws Exception {
 		boolean fail = false;
 		System.out.println("Filling global table...");
-		String[] lineParts;
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new DataInputStream(new FileInputStream(file))));
-		// skip first line column names
-		br.readLine();
 		String insertIntoSql = "insert into " + testTablePrefix + "GLOBAL (";
 		for (Integer key : matrixColumnsIndex.values())
 			insertIntoSql += "c" + key + ", ";
 		insertIntoSql = insertIntoSql.substring(0, insertIntoSql.length() - 2)
 				+ ") ";
-
-		String line;
+		CSVReader reader = new CSVReader(new InputStreamReader(
+				new FileInputStream(file), "UTF-8"));
+		String[] line;
+		// Skip header.
+		reader.readNext();
 		Integer totalCounter = 1;
 		Integer counter = 1;
-		while ((line = br.readLine()) != null) {
+		while ((line = reader.readNext()) != null) {
 			totalCounter++;
 			counter++;
 			if (counter >= 500) {
@@ -150,22 +147,24 @@ public class DataTestMatrix {
 				System.out.println("Rowcount: " + totalCounter);
 			}
 			Boolean exception = false;
-			if (line.substring(line.length() - 1).equals("\t")) {
-				line = line + "NULL";
-			}
-			lineParts = line.split(matrixSeperator);
 			String selectSql = "select ";
+
 			for (Integer key : matrixColumnsIndex.values()) {
 				try {
-					selectSql += "'" + lineParts[key].replace("'", "''")
-							+ "', ";
+					selectSql += "'" + line[key].replace("'", "''") + "', ";
 				} catch (Exception e) {
 					exception = true;
 					fail = true;
 				}
 			}
 			if (exception) {
-				System.out.println("FAIL: Wrong line length. Line: " + line);
+				String linestr = "";
+				for (int i = 0; i < line.length; i++) {
+					linestr += line[i] + ",";
+				}
+				linestr = selectSql.substring(0, selectSql.length() - 1);
+				System.out.println("FAIL: Wrong line length. Line:" + linestr
+						+ "END");
 			} else {
 				selectSql = selectSql.substring(0, selectSql.length() - 2)
 						+ " from dual";
@@ -173,7 +172,6 @@ public class DataTestMatrix {
 				stmt.executeQuery(insertIntoSql + selectSql);
 			}
 		}
-		br.close();
 		return fail;
 	}
 
