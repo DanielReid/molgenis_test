@@ -15,14 +15,19 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class DataTestSmokingCsvStage {
 
+	// Input CSV file
 	String csvFile = "d:/smoking.csv";
+
+	// MSSQL parameters
 	String serverMSSQL = "WTZKH0077";
 	String databaseMSSQL = "LLCDR_Stage";
-	String[] excludedColumns = new String[] { "LL_NR", "WGA_LLNR", "GESLACHT",
-			"GEBDAT", "gwa" };
 	String dbDriverMSSQL = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	String dbUrlMSSQL = "jdbc:sqlserver://" + serverMSSQL + ";databaseName="
 			+ databaseMSSQL + ";integratedSecurity=true";
+
+	// Exclusion parameter
+	String[] excludedColumns = new String[] { "LL_NR", "WGA_LLNR", "GESLACHT",
+			"GEBDAT", "gwa" };
 
 	ArrayList<String> columns = new ArrayList<String>();
 	Connection connMSSQL;
