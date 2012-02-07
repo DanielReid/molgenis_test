@@ -1,6 +1,8 @@
 package test.web;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,22 +19,22 @@ import org.testng.annotations.Test;
 public class DataTestMatrixLookupComplete {
 
 	// Input CSV file
-	String file = "/download.csv";
+	String file = "H:/Data/Exports/20120201 Export Matrix Viewer/Export_All_2012-02-01_09_44_47.csv";
 
 	// Oracle parameters
-	String dbDriver = "oracle.jdbc.driver.OracleDriver";
-	String dbUrl = "jdbc:oracle:thin:@//localhost:2000/llptest";
-	String dbUsername = "MOLGENIS1";
-	String dbPassword = "talpa010t";
+	String dbDriverOracle = "oracle.jdbc.driver.OracleDriver";
+	String databaseOracle = "llptest";
+	String dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/" + databaseOracle;
+	String dbUsernameOracle = "molgenis";
 
 	// Prefix and owner details
 	String testTablePrefix = "TEST_";
-	String testOwner = "MOLGENIS1";
 	String sourceTablePrefix = "";
-	String sourceOwner = "MOLGENIS1";
 	String matrixColumnSeperator = "__";
 	String matrixStringDateFormat = "yyyy-mm-dd";
 
+	String testOwner = dbUsernameOracle;
+	String sourceOwner = dbUsernameOracle;
 	Statement stmt;
 	ResultSet rset;
 	String[] paidMatrixColumnNameParts;
@@ -51,7 +53,7 @@ public class DataTestMatrixLookupComplete {
 		}
 		makeGlobalTable();
 		if (fillGlobalTable()) {
-			// Assert.assertFalse(true);
+			Assert.assertFalse(true);
 		}
 		makeTables();
 		fillTables();
@@ -63,12 +65,17 @@ public class DataTestMatrixLookupComplete {
 			Assert.assertFalse(true);
 	}
 
-	public void init() {
+	public void init() throws IOException {
 		Locale.setDefault(Locale.US);
-		try {
-			Class.forName(dbDriver);
-			Connection conn = DriverManager.getConnection(dbUrl, dbUsername,
-					dbPassword);
+		System.out.print("Enter Oracle password for database '"
+				+ databaseOracle + "' and user '" + dbUsernameOracle + "':");
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String dbPasswordOracle = null;
+		dbPasswordOracle = br.readLine();		
+		try {	
+			Class.forName(dbDriverOracle);
+			Connection conn = DriverManager.getConnection(dbUrlOracle, dbUsernameOracle,
+					dbPasswordOracle);
 			stmt = conn.createStatement();
 		} catch (Exception e) {
 			System.out.println(e);
@@ -80,6 +87,18 @@ public class DataTestMatrixLookupComplete {
 		CSVReader reader = new CSVReader(new InputStreamReader(
 				new FileInputStream(file), "UTF-8"));
 		String[] headerLine = reader.readNext();
+
+//		TODO
+//		for (int i = 0; i < headerLine.length; i++) {
+//			System.out.println(headerLine[i]);
+//			String sql = "select table_name, column_name from ALL_TAB_COLUMNS where owner ='"
+//					+ testOwner + "' and column_name='" + headerLine[i] + "'";
+//			rset = stmt.executeQuery("select count(*) from (" + sql + ")");
+//			rset.next();
+//			System.out.println(rset.getString(1));
+//			System.out.println(rset.getString(2));
+//		}
+
 		for (int i = 0; i < headerLine.length; i++) {
 			if (headerLine[i].length() != 0) {
 				String[] matrixColumnParts = headerLine[i]

@@ -1,5 +1,8 @@
 package test.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,7 +24,6 @@ public class DataTestCompareTablesPublishPublish {
 	String databaseOracle = "llptest";
 	String dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/" + databaseOracle;
 	String dbUsernameOracle = "molgenis1";
-	String dbPasswordOracle = "talpa010t";
 
 	// MSSQL parameters
 	String serverMSSQL = "W3ZKHAS323";
@@ -88,9 +90,14 @@ public class DataTestCompareTablesPublishPublish {
 	 * 
 	 * ***********************************************************************
 	 */
-	public void init() {
+	public void init() throws IOException {
 		// Set regional setting to US.
 		Locale.setDefault(Locale.US);
+		System.out.print("Enter Oracle password for database '"
+				+ databaseOracle + "' and user '" + dbUsernameOracle + "':");
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String dbPasswordOracle = null;
+		dbPasswordOracle = br.readLine();
 		// Make Oracle connection.
 		try {
 			Class.forName(dbDriverOracle);

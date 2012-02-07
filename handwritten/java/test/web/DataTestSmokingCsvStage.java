@@ -43,12 +43,11 @@ public class DataTestSmokingCsvStage {
 		getColumnsIndex();
 		getCsvData();
 		getDbData();
-		compare();
 	}
 
 	@Test(dependsOnMethods = { "testInit" })
 	public void testCompare() throws Exception {
-		if (false) {
+		if (compare()) {
 			Assert.assertFalse(true);
 		}
 	}
@@ -100,7 +99,7 @@ public class DataTestSmokingCsvStage {
 		}
 	}
 
-	public void compare() throws Exception {
+	public boolean compare() throws Exception {
 		boolean fail = false;
 		int csvRowCount = csvData.size();
 		int dbRowCount = dbData.size();
@@ -148,17 +147,17 @@ public class DataTestSmokingCsvStage {
 				System.out.println();
 			}
 		}
-		// Lookup Database in CVS
+		// Lookup Database in CSV
 		totalCounter = 0;
 		stepCounter = 0;
-		System.out.println("Lookup Database in CVS [" + totalCounter + "/"
+		System.out.println("Lookup Database in CSV [" + totalCounter + "/"
 				+ dbRowCount + "].");
 		for (String[] dbLine : dbData) {
 			totalCounter++;
 			stepCounter++;
 			if (stepCounter >= 500) {
 				stepCounter = 0;
-				System.out.println("Lookup Database in CVS [" + totalCounter
+				System.out.println("Lookup Database in CSV [" + totalCounter
 						+ "/" + dbRowCount + "].");
 				System.out.println();
 			}
@@ -167,12 +166,12 @@ public class DataTestSmokingCsvStage {
 				// Look back
 				int intAmountInDb = amountInDb(dbLine);
 				if (intAmountInCsv != intAmountInDb) {
-					fail = true;					
+					fail = true;
 					System.out.println("FAIL: Count db/csv: " + intAmountInDb
 							+ "/" + intAmountInCsv + ".");
 					System.out.println("CSV Line: " + getLine(dbLine));
 					System.out.println("SQL: " + getSqlLine(dbLine));
-					System.out.println();				
+					System.out.println();
 				}
 			}
 			if (intAmountInCsv == 0) {
@@ -183,7 +182,7 @@ public class DataTestSmokingCsvStage {
 				System.out.println();
 			}
 		}
-
+		return fail;
 	}
 
 	public int amountInDb(String[] line) {
