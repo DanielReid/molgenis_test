@@ -13,15 +13,15 @@ import java.util.Locale;
 import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import java.io.*;
 
 public class DataTestPublishStageLookup {
 
 	// Oracle parameters
 	String dbDriverOracle = "oracle.jdbc.driver.OracleDriver";
-	String databaseOracle = "llptest";
+	String databaseOracle = "llpacc";
 	String dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/" + databaseOracle;
 	String dbUsernameOracle = "molgenis";
-	String dbPasswordOracle = "molTagtGen24Ora";
 
 	// MSSQL parameters
 	String serverMSSQL = "W3ZKHAS323";
@@ -52,7 +52,9 @@ public class DataTestPublishStageLookup {
 	public void testInit() throws Exception {
 		init();
 		getPublishTablesColumns();
-		getTotalRecordCount();
+		if (getTotalRecordCount()) {
+			Assert.assertFalse(true);
+		}
 	}
 
 	@Test(dependsOnMethods = { "testInit" })
@@ -67,8 +69,13 @@ public class DataTestPublishStageLookup {
 			Assert.assertFalse(true);
 	}
 
-	public void init() {
+	public void init() throws Exception {
 		Locale.setDefault(Locale.US);
+		System.out.print("Enter Oracle password for database '"
+				+ databaseOracle + "' and user '" + dbUsernameOracle + "':");
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String dbPasswordOracle = null;
+		dbPasswordOracle = br.readLine();
 		try {
 			Class.forName(dbDriverOracle);
 			connOracle = DriverManager.getConnection(dbUrlOracle,
@@ -94,7 +101,8 @@ public class DataTestPublishStageLookup {
 	}
 
 	public void getPublishTablesColumns() throws Exception {
-		System.out.println("Getting all the related tables form metadata...");
+		System.out
+				.println("Getting all the related tables and colums form metadata...");
 		rsetOracle = stmtOracle.executeQuery(metadataQueryOracle);
 		while (rsetOracle.next()) {
 			Boolean TableOrColumnNotExcluded = true;
@@ -129,14 +137,23 @@ public class DataTestPublishStageLookup {
 		}
 	}
 
-	public void getTotalRecordCount() throws Exception {
+	public boolean getTotalRecordCount() throws Exception {
+		boolean fail = false;
+		System.out.println("Getting total record count...");
 		for (Map.Entry<String, ArrayList<String>> tabCols : publishTablesColumns
 				.entrySet()) {
-			rsetOracle = stmtOracle.executeQuery("select count(*) from "
-					+ tabCols.getKey());
-			rsetOracle.next();
-			totalRecordCount += Integer.parseInt(rsetOracle.getString(1));
+			try {
+				rsetOracle = stmtOracle.executeQuery("select count(*) from "
+						+ tabCols.getKey());
+				rsetOracle.next();
+				totalRecordCount += Integer.parseInt(rsetOracle.getString(1));
+			} catch (SQLException e) {
+				fail = true;
+				System.out.println("select count(*) from " + tabCols.getKey());
+				System.out.println(e);
+			}
 		}
+		return fail;
 	}
 
 	public Boolean compareTableColums() throws Exception {
