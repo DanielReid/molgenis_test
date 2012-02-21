@@ -178,9 +178,9 @@ public class TestDatabase extends TestCase
 			// try change readonly xref
 			//x1.setReadonlyXref(2);
 			//db.update(x1);
-
 			x1 = db.find(MrefEntity.class).get(0);
-			assertEquals(x1.getNormalMref().get(0), v.getId());
+			VarcharEntity firstEntity = x1.getNormalMref().iterator().next(); 
+			assertEquals(firstEntity, v.getId());
 
 			// check label
 			assertEquals(x1.getNillableMref_NormalVarchar().get(0), v.getNormalVarchar());
