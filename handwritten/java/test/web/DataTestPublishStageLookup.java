@@ -21,18 +21,17 @@ public class DataTestPublishStageLookup {
 	String dbDriverOracle = "oracle.jdbc.driver.OracleDriver";
 	String databaseOracle = "llpacc";
 	String dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/" + databaseOracle;
-	String dbUsernameOracle = "molgenis";
+	String dbUsernameOracle = "molgenis3";
 
 	// MSSQL parameters
-	String serverMSSQL = "W3ZKHAS323";
+	String serverMSSQL = "WTZKH0077";
 	String databaseMSSQL = "LLCDR_Stage";
 	String dbDriverMSSQL = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 	String dbUrlMSSQL = "jdbc:sqlserver://" + serverMSSQL + ";databaseName="
 			+ databaseMSSQL + ";integratedSecurity=true";
 
 	// Exclusion parameters
-	String[] excludedTables = new String[] { "UVHEALTH", "ONDERZOEKPATIENT",
-			"BLOEDDRUKAVG", "BEZOEK1", "UVDEMOG", "ECGLEADS" };
+	String[] excludedTables = new String[] { "VW_BEZOEK_PIVOT" , "VW_LABDATA_PIVOT" };
 	String[] excludedColumns = new String[] { "PA_ID" };
 
 	String metadataQueryOracle = "select tabnaam, veld from vw_dict group by tabnaam, veld";
@@ -71,8 +70,11 @@ public class DataTestPublishStageLookup {
 
 	public void init() throws Exception {
 		Locale.setDefault(Locale.US);
-		System.out.print("Enter Oracle password for database '"
-				+ databaseOracle + "' and user '" + dbUsernameOracle + "':");
+		System.out.println("MSSQL Server: " + serverMSSQL);
+		System.out.println("MSSQL Database: " + databaseMSSQL);
+		System.out.println("Oracle Database: " + databaseOracle);
+		System.out.println("Oracle Username: " + dbUsernameOracle);
+		System.out.print("Enter Oracle password: ");
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String dbPasswordOracle = null;
 		dbPasswordOracle = br.readLine();
@@ -106,32 +108,27 @@ public class DataTestPublishStageLookup {
 		rsetOracle = stmtOracle.executeQuery(metadataQueryOracle);
 		while (rsetOracle.next()) {
 			Boolean TableOrColumnNotExcluded = true;
+			String table = rsetOracle.getString(1).toUpperCase();
+			String column = rsetOracle.getString(2).toUpperCase();
 			for (int i = 0; i < excludedTables.length; i++) {
-				if (excludedTables[i].equals(rsetOracle.getString(1)
-						.toUpperCase()))
+				if (excludedTables[i].equals(table))
 					TableOrColumnNotExcluded = false;
 			}
 			for (int i = 0; i < excludedColumns.length; i++) {
-				if (excludedColumns[i].equals(rsetOracle.getString(2)
-						.toUpperCase()))
+				if (excludedColumns[i].equals(column))
 					TableOrColumnNotExcluded = false;
 			}
 			if (TableOrColumnNotExcluded) {
-				if (publishTablesColumns.get(rsetOracle.getString(1)
-						.toUpperCase()) == null) {
+				if (publishTablesColumns.get(table) == null) {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns.add(rsetOracle.getString(2).toUpperCase());
-					publishTablesColumns.put(rsetOracle.getString(1)
-							.toUpperCase(), dbColumns);
+					dbColumns.add(column);
+					publishTablesColumns.put(table, dbColumns);
 				} else {
 					ArrayList<String> dbColumns = new ArrayList<String>();
-					dbColumns = publishTablesColumns.get(rsetOracle
-							.getString(1).toUpperCase());
-					if (dbColumns.contains(rsetOracle.getString(2)
-							.toUpperCase()) == false)
-						dbColumns.add(rsetOracle.getString(2).toUpperCase());
-					publishTablesColumns.put(rsetOracle.getString(1)
-							.toUpperCase(), dbColumns);
+					dbColumns = publishTablesColumns.get(table);
+					if (dbColumns.contains(column) == false)
+						dbColumns.add(column);
+					publishTablesColumns.put(table, dbColumns);
 				}
 			}
 		}
@@ -421,13 +418,13 @@ public class DataTestPublishStageLookup {
 				|| datatype == "varchar" || datatype == "nvarchar")
 			ps.setString(psIndex, rset.getString(col));
 		else if (datatype == "int")
-			ps.setInt(psIndex, rsetMSSQL.getInt(col));
+			ps.setInt(psIndex, rset.getInt(col));
 		else if (datatype == "tinyint" || datatype == "smallint")
-			ps.setShort(psIndex, rsetMSSQL.getShort(col));
+			ps.setShort(psIndex, rset.getShort(col));
 		else if (datatype == "uniqueidentifier")
-			ps.setString(psIndex, "{" + rsetMSSQL.getString(col) + "}");
+			ps.setString(psIndex, "{" + rset.getString(col) + "}");
 		else if (datatype == "bigint")
-			ps.setLong(psIndex, rsetMSSQL.getLong(col));
+			ps.setLong(psIndex, rset.getLong(col));
 		else {
 			ps.setString(psIndex, rset.getString(col));
 			System.out.println("DATATYPE CONVERSION FOR'" + datatype
