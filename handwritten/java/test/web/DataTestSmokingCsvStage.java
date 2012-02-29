@@ -214,7 +214,8 @@ public class DataTestSmokingCsvStage {
 		String sql1 = sql + " where ";
 		for (int i = 0; i < line.length; i++) {
 			// Handle null values
-			if (line[i].equals("") || line[i].toLowerCase().equals("null"))
+			if (line[i] == null || line[i].equals("")
+					|| line[i].toLowerCase().equals("null"))
 				sql1 += columnsIndex.get(i) + " is null and ";
 			// Handle numeric values
 			else if (line[i].matches("[-+]?\\d+(\\.\\d+)?"))
