@@ -55,6 +55,7 @@ public class DataTestPivotViews {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String dbPasswordOracle = null;
 		dbPasswordOracle = br.readLine();
+		System.out.println();
 		try {
 			Class.forName(dbDriverOracle);
 			Connection conn = DriverManager.getConnection(dbUrlOracle,

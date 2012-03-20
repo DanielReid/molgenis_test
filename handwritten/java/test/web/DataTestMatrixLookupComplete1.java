@@ -21,15 +21,16 @@ import org.testng.annotations.Test;
 
 public class DataTestMatrixLookupComplete1 {
 
-	String file = "H:/Data/export/20120229_molgenis3_llpacc_labels.csv";
-	String databaseOracle = "llpacc";
-	String dbUsernameOracle = "molgenis3";
+	String file = "H:/Data/export/Export_All_2012-03-20_11_36_57_molgenis3_llpacc.csv";
+	String databaseOracle = "llp";
+	String dbUsernameOracle = "molgenis2";
 	String matrixStringDateFormat = "yyyy-mm-dd";
 	String dict = "select tabnaam, veld from vw_dict "
-			/* remove this part after meta data bug fix*/
+			/* remove this part after meta data bug fix */
 			+ "minus select tabnaam, veld from vw_dict where tabnaam = 'BEZOEK1' and veld = 'PA_ID'"
 			+ "minus select tabnaam, veld from vw_dict where tabnaam = 'ECGLEADS' and veld = 'PA_ID'"
-			+ "minus select tabnaam, veld from vw_dict where tabnaam = 'BLOEDDRUKAVG' and veld = 'PA_ID'";
+			+ "minus select tabnaam, veld from vw_dict where tabnaam = 'BLOEDDRUKAVG' and veld = 'PA_ID'"
+			+ "minus select tabnaam, veld from vw_dict where veld = 'ID'";
 	String dictValues = "select tabnaam, veld, vallabelabel, vallabelval from vw_dict_valuesets";
 	String[] idFields = { "ID", "PA_ID", "BZ_ID" };
 
@@ -38,7 +39,8 @@ public class DataTestMatrixLookupComplete1 {
 	ArrayList<String> alIdFields = new ArrayList<String>(
 			Arrays.asList(idFields));
 	String dbDriverOracle = "oracle.jdbc.driver.OracleDriver";
-	String dbUrlOracle = "jdbc:oracle:thin:@//localhost:2000/" + databaseOracle;
+	String dbUrlOracle = "jdbc:oracle:thin:@//192.168.30.21:1521/"
+			+ databaseOracle;
 	String testOwner = dbUsernameOracle;
 	String sourceOwner = dbUsernameOracle;
 	Statement stmt;
@@ -96,7 +98,7 @@ public class DataTestMatrixLookupComplete1 {
 		for (int i = 0; i < headerLine.length; i++)
 			if (headerLine[i].length() != 0)
 				matrixColumnsIndexSource.put(headerLine[i], i);
-		
+
 		// Make table, columns sets from CSV columns that match meta data.
 		rset = stmt.executeQuery(dict);
 		while (rset.next()) {
@@ -126,7 +128,7 @@ public class DataTestMatrixLookupComplete1 {
 		for (String removeTable : removeTables) {
 			tablesColumnsFound.remove(removeTable);
 		}
-		
+
 		// Get CSV columns not matching meta data.
 		for (String matrixColumn : matrixColumnsIndexSource.keySet()) {
 			if (matrixColumnsIndexFound.containsKey(matrixColumn) == false)
@@ -142,8 +144,8 @@ public class DataTestMatrixLookupComplete1 {
 					rset.getString(4));
 		}
 		rset.close();
-		
-		// Console output 
+
+		// Console output
 		System.out
 				.println("Metadata found in Matrix columns. Matrix {index=column}: "
 						+ matrixColumnsIndexFound);
@@ -179,7 +181,7 @@ public class DataTestMatrixLookupComplete1 {
 			ArrayList<String> columns = tableColumns.getValue();
 			List<String[]> csvData = new ArrayList<String[]>();
 			List<String[]> dbData = new ArrayList<String[]>();
-			
+
 			// Get DB data for table.
 			System.out.println("Get DB data for table: " + table);
 			String sql = "select ";
@@ -200,6 +202,9 @@ public class DataTestMatrixLookupComplete1 {
 							|| rset.getString(i).toLowerCase().equals("null")
 							|| rset.getString(i).equals(""))
 						lRow.add("");
+					else if (rset.getString(i).substring(0, 1).equals(".") && ("0" + rset.getString(i)).matches(
+							"[-+]?\\d+(\\.\\d+)?"))
+						lRow.add(("0" + rset.getString(i)));
 					else
 						lRow.add(rset.getString(i));
 				}
@@ -207,7 +212,7 @@ public class DataTestMatrixLookupComplete1 {
 				dbData.add(saRow);
 			}
 			rset.close();
-			
+
 			// Get CSV data for table.
 			System.out.println("Get CSV data for table: " + table);
 			CSVReader reader = new CSVReader(new InputStreamReader(
