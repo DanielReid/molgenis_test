@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 public class DataTestMatrixLookupComplete1 {
 
-	String file = "H:/Data/export/Export_All_2012-03-20_11_36_57_molgenis3_llpacc.csv";
+	String file = "H:/Data/export/Export_All_2012-03-20_11_36_57_molgenis2_llp.csv";
 	String databaseOracle = "llp";
 	String dbUsernameOracle = "molgenis2";
 	String matrixStringDateFormat = "yyyy-mm-dd";
@@ -197,19 +197,29 @@ public class DataTestMatrixLookupComplete1 {
 				stepCounter++;
 				totalCounter++;
 				List<String> lRow = new ArrayList<String>();
+				boolean addLine = false;
 				for (int i = 1; i <= columns.size(); i++) {
 					if (rset.getString(i) == null
 							|| rset.getString(i).toLowerCase().equals("null")
 							|| rset.getString(i).equals(""))
 						lRow.add("");
-					else if (rset.getString(i).substring(0, 1).equals(".") && ("0" + rset.getString(i)).matches(
-							"[-+]?\\d+(\\.\\d+)?"))
+					else if (rset.getString(i).substring(0, 1).equals(".")
+							&& ("0" + rset.getString(i))
+									.matches("[-+]?\\d+(\\.\\d+)?")) {
 						lRow.add(("0" + rset.getString(i)));
-					else
+						if (alIdFields.contains(columns.get(i-1)) == false)
+							addLine = true;
+					} else {
 						lRow.add(rset.getString(i));
+						if (alIdFields.contains(columns.get(i-1)) == false)
+							addLine = true;
+					}
 				}
-				String[] saRow = lRow.toArray(new String[lRow.size()]);
-				dbData.add(saRow);
+				// Filter null values.
+				if (addLine) {
+					String[] saRow = lRow.toArray(new String[lRow.size()]);
+					dbData.add(saRow);
+				}
 			}
 			rset.close();
 
