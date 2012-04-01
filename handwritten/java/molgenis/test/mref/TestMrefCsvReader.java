@@ -7,7 +7,6 @@ import molgenis_test.fields.MrefEntity;
 
 import org.molgenis.util.CsvFileReader;
 import org.molgenis.util.CsvReader;
-import org.molgenis.util.CsvReaderListener;
 import org.molgenis.util.Tuple;
 
 public class TestMrefCsvReader
@@ -17,26 +16,22 @@ public class TestMrefCsvReader
 		URL f = TestMrefCsvReader.class.getResource("data.tab");
 		CsvReader r = new CsvFileReader(new File(f.getFile()));
 
-		r.parse(new CsvReaderListener()
+		for (Tuple tuple : r)
 		{
-
-			@Override
-			public void handleLine(int line_number, Tuple tuple) throws Exception
+			// TODO Auto-generated method stub
+			System.out.println(tuple);
+			if (tuple.notNull("mref_field")) for (Object o : tuple
+					.getList("mref_field"))
 			{
-				// TODO Auto-generated method stub
-				System.out.println(tuple);
-				if (tuple.notNull("mref_field")) for (Object o : tuple.getList("mref_field"))
-				{
-					
-					System.out.println(o);
-				}
-				
-				MrefEntity e = new MrefEntity();
-				e.set(tuple);
-				System.out.println(e);
 
+				System.out.println(o);
 			}
-		});
+
+			MrefEntity e = new MrefEntity();
+			e.set(tuple);
+			System.out.println(e);
+
+		}
 
 	}
 }
